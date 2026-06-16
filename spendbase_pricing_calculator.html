@@ -1,0 +1,1043 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Software Pricing Calculator</title>
+<style>
+[x-cloak]{display:none!important}
+:root{--bg:#070E1C;--s:#0D1B36;--s2:#0F2040;--s3:#152850;--bd:#1D3357;--ac:#3B7BF6;--acl:rgba(59,123,246,.12);--gr:#12C07C;--grl:rgba(18,192,124,.11);--tx:#EDF2FC;--tx2:#8BA3C3;--tx3:#4E6285;--ra:9px;--ra2:14px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--tx);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:15px;line-height:1.5}
+#app{max-width:820px;margin:0 auto;padding:0 20px 80px}
+/* Header */
+.hdr{padding:28px 0 20px;border-bottom:1px solid var(--bd);margin-bottom:0}
+.hdr-inner{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.logo-text{font-size:20px;font-weight:600;letter-spacing:-.3px;color:var(--tx)}
+.total-pill{background:var(--grl);border:1px solid var(--gr);border-radius:40px;padding:7px 18px;font-size:14px;color:var(--gr);font-weight:500;transition:all .3s}
+/* Sections */
+.sect{border-bottom:1px solid var(--bd);padding:28px 0}
+.sect:last-child{border-bottom:none}
+.sect-label{font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:var(--tx3);font-weight:500;margin-bottom:14px}
+.sect-title{font-size:19px;font-weight:500;margin-bottom:6px}
+.sect-sub{font-size:13px;color:var(--tx2);margin-bottom:20px}
+/* Cards */
+.card{background:var(--s);border:1.5px solid var(--bd);border-radius:var(--ra2);padding:16px 18px;cursor:pointer;transition:border-color .18s,background .18s;position:relative;overflow:hidden}
+.card:hover{border-color:var(--ac);background:var(--s2)}
+.card.sel{border-color:var(--ac);background:var(--acl)}
+.card.rec{border-color:#F5A623}
+.card-accent{height:3px;position:absolute;top:0;left:0;right:0;border-radius:2px 2px 0 0}
+.card-title{font-size:14px;font-weight:500;margin-top:4px}
+.card-sub{font-size:12px;color:var(--tx2);margin-top:3px;line-height:1.4}
+.card-tag{font-size:11px;color:var(--tx3);margin-top:6px}
+.rec-badge{display:inline-block;background:#F5A623;color:#3D2600;font-size:10px;font-weight:600;padding:2px 10px;border-radius:4px;margin-bottom:8px;letter-spacing:.3px}
+/* Grids */
+.g2{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
+.g3{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px}
+.g4{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:10px}
+/* Toggle row */
+.trow{display:flex;border:1px solid var(--bd);border-radius:var(--ra);overflow:hidden;width:fit-content;flex-wrap:wrap}
+.tb{padding:7px 15px;font-size:13px;background:none;color:var(--tx2);border:none;cursor:pointer;transition:background .15s,color .15s;white-space:nowrap}
+.tb.on{background:var(--ac);color:#fff}
+.tb:not(.on):hover{background:var(--s2);color:var(--tx)}
+/* Form */
+.field{margin-bottom:18px}
+.lbl{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--tx2);font-weight:500;margin-bottom:8px}
+input[type=number],input[type=text],select{background:var(--s2);color:var(--tx);border:1px solid var(--bd);border-radius:var(--ra);padding:8px 12px;font-size:14px;font-family:inherit;outline:none;width:100%}
+input[type=number]{width:90px}
+input:focus,select:focus{border-color:var(--ac)}
+select option{background:var(--s2)}
+/* Search */
+.sw{position:relative}
+.sw input{padding-left:36px}
+.si{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--tx3);font-size:15px;pointer-events:none;user-select:none}
+/* Plan list */
+.plist{max-height:240px;overflow-y:auto;border:1px solid var(--bd);border-radius:var(--ra);margin-top:8px}
+.plist::-webkit-scrollbar{width:4px}
+.plist::-webkit-scrollbar-thumb{background:var(--bd);border-radius:4px}
+.pi{display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;transition:background .12s;border-bottom:1px solid var(--bd)}
+.pi:last-child{border-bottom:none}
+.pi:hover{background:var(--s2)}
+.pi-cat{font-size:10px;color:var(--tx3);text-transform:uppercase;letter-spacing:.4px}
+.pi-name{font-size:13px;font-weight:500;line-height:1.3}
+.pi-right{margin-left:auto;text-align:right;flex-shrink:0}
+.pi-price{font-size:13px;font-weight:500}
+.pi-disc{font-size:11px;color:var(--gr)}
+/* Item rows (added plans) */
+.irow{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--s);border:1px solid var(--bd);border-radius:var(--ra);margin-bottom:8px;flex-wrap:wrap}
+.irow-name{flex:1;font-size:13px;font-weight:500;min-width:130px}
+.irow-tag{font-size:11px;padding:2px 8px;border-radius:20px;background:var(--acl);color:var(--ac);white-space:nowrap}
+.irow-price{font-size:12px;color:var(--tx2);white-space:nowrap}
+.irow-save{font-size:12px;color:var(--gr);font-weight:500;white-space:nowrap}
+.rm{background:none;border:none;color:var(--tx3);cursor:pointer;font-size:20px;padding:0 4px;line-height:1;transition:color .12s}
+.rm:hover{color:#E24B4A}
+/* Callout */
+.callout{border-radius:var(--ra);padding:12px 16px;font-size:13px;line-height:1.5;margin-top:12px;display:flex;gap:12px;align-items:flex-start}
+.callout-up{background:var(--acl);border:1px solid var(--ac)}
+.callout-save{background:var(--grl);border:1px solid var(--gr)}
+.callout-ico{flex-shrink:0;font-size:16px;margin-top:1px}
+.callout-title{font-weight:500;margin-bottom:2px}
+.callout-link{font-size:12px;color:var(--ac);cursor:pointer;text-decoration:underline;margin-top:4px;display:inline-block}
+/* Buttons */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 20px;background:var(--ac);color:#fff;border:none;border-radius:var(--ra);font-size:13px;font-weight:500;cursor:pointer;transition:opacity .15s}
+.btn:hover{opacity:.85}
+.btn-sec{background:var(--s2);color:var(--tx);border:1px solid var(--bd)}
+.btn-sec:hover{opacity:1;background:var(--s3)}
+.btn-sm{padding:6px 14px;font-size:12px}
+/* Summary section */
+.sum-hero{background:var(--s);border:1px solid var(--bd);border-radius:var(--ra2);padding:26px;text-align:center;margin-bottom:20px}
+.sum-big{font-size:44px;font-weight:600;color:var(--gr);line-height:1;margin-top:4px}
+.sum-lbl{font-size:13px;color:var(--tx2)}
+.sum-row2{display:flex;justify-content:center;gap:32px;margin-top:18px;flex-wrap:wrap}
+.sum-stat .sv{font-size:20px;font-weight:500}
+.sum-stat .sl{font-size:11px;color:var(--tx3);text-transform:uppercase;letter-spacing:.4px;margin-top:2px}
+.svc-block{background:var(--s);border:1px solid var(--bd);border-radius:var(--ra2);margin-bottom:10px;overflow:hidden}
+.svc-hdr{padding:12px 18px;background:var(--s2);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+.svc-hdr-name{font-weight:500;font-size:14px}
+.svc-hdr-save{font-size:13px;color:var(--gr);font-weight:500}
+.sr-rows{padding:0 18px}
+.sr{display:flex;justify-content:space-between;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--bd);gap:12px;flex-wrap:wrap}
+.sr:last-child{border-bottom:none}
+.sr-name{font-size:13px;flex:1;min-width:140px}
+.sr-right{text-align:right;flex-shrink:0}
+.sr-mkt{font-size:11px;color:var(--tx3);text-decoration:line-through}
+.sr-our{font-size:13px;font-weight:500}
+.sr-save{font-size:11px;color:var(--gr)}
+.total-bar{background:var(--s);border:1px solid var(--bd);border-radius:var(--ra2);padding:16px 20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-top:12px}
+.total-bar-name{font-size:15px;font-weight:500}
+.total-bar-right{text-align:right}
+.total-bar-mo{font-size:13px;color:var(--tx2)}
+.total-bar-yr{font-size:22px;font-weight:600;color:var(--gr)}
+/* Misc */
+.sep{height:1px;background:var(--bd);margin:16px 0}
+.note{font-size:12px;color:var(--tx2);padding:10px 14px;background:var(--s2);border-radius:var(--ra);border-left:3px solid var(--bd);line-height:1.5;margin-top:10px}
+.qty-row{display:flex;align-items:center;gap:10px}
+.ql{font-size:13px;color:var(--tx2)}
+.empty{font-size:13px;color:var(--tx3);padding:20px;text-align:center}
+/* Brand accent colors — per software */
+.brand-gw{background:#4285F4}
+.brand-ms{background:#00A4EF}
+.brand-adobe{background:#FF3B30}
+.brand-pw{background:#10B981}
+.brand-bitwarden{background:#175DDC}
+.brand-lastpass{background:#CC2029}
+.brand-1password{background:#1A8CFF}
+.brand-spendbase{background:#3B7BF6}
+/* Scope radio */
+.scope-opts{display:flex;gap:14px;flex-wrap:wrap;margin-top:12px}
+.scope-opt{display:flex;align-items:center;gap:8px;padding:10px 16px;background:var(--s);border:1.5px solid var(--bd);border-radius:var(--ra);cursor:pointer;transition:border-color .15s;font-size:14px}
+.scope-opt.on{border-color:var(--ac);background:var(--acl)}.scope-opt input{accent-color:var(--ac);width:15px;height:15px}
+/* Print */
+@media print{
+  .no-print{display:none!important}
+  body{background:#fff;color:#111}
+  #app{padding:20px}
+  .card,.sect,.svc-block,.total-bar,.sum-hero{background:#fff;border-color:#ccc}
+  .sum-big,.svc-hdr-save,.sr-save,.total-bar-yr{color:#155724!important}
+}
+</style>
+</head>
+<body>
+<div id="app" x-data="calcApp()" x-cloak>
+
+<!-- Header -->
+<div class="hdr">
+  <div class="hdr-inner">
+    <div class="logo-text">Software Pricing Calculator</div>
+    <div class="total-pill" x-show="totalSavings.an > 0" x-transition>
+      Saving <strong x-text="fmtInt(totalSavings.mo)"></strong>/mo · <strong x-text="fmtInt(totalSavings.an)"></strong>/yr
+    </div>
+  </div>
+</div>
+
+<!-- ─── SECTION 1: REGION ─────────────────────────── -->
+<div class="sect">
+  <div class="sect-label">Step 1</div>
+  <div class="sect-title">Client region</div>
+  <div class="sect-sub">This determines available services and currencies.</div>
+  <div class="g3">
+    <div class="card" :class="{sel: region==='europe'}" @click="setRegion('europe')">
+      <div class="card-accent brand-gw"></div>
+      <div class="card-title">Europe</div>
+      <div class="card-sub">Microsoft EUR · Google Workspace EUR · Adobe EUR</div>
+    </div>
+    <div class="card" :class="{sel: region==='ukraine'}" @click="setRegion('ukraine')">
+      <div class="card-accent" style="background:#FFD700"></div>
+      <div class="card-title">Ukraine</div>
+      <div class="card-sub">Microsoft USD · Google Workspace EUR / USD</div>
+    </div>
+    <div class="card" :class="{sel: region==='row'}" @click="setRegion('row')">
+      <div class="card-accent brand-spendbase"></div>
+      <div class="card-title">Rest of world</div>
+      <div class="card-sub">Google Workspace USD · Password Manager</div>
+    </div>
+  </div>
+
+  <!-- Scope question -->
+  <div x-show="region" x-transition style="margin-top:20px">
+    <div class="lbl">Does this region apply to:</div>
+    <div class="scope-opts">
+      <label class="scope-opt" :class="{on: regionScope==='all'}">
+        <input type="radio" x-model="regionScope" value="all"> All selected services
+      </label>
+      <label class="scope-opt" :class="{on: regionScope==='per'}">
+        <input type="radio" x-model="regionScope" value="per"> Different per service
+      </label>
+    </div>
+  </div>
+</div>
+
+<!-- ─── SECTION 2: SERVICES ──────────────────────── -->
+<div class="sect" x-show="region" x-transition>
+  <div class="sect-label">Step 2</div>
+  <div class="sect-title">Select services</div>
+  <div class="sect-sub">Choose one or more. Each expands for configuration below.</div>
+  <div class="g4">
+    <div class="card" :class="{sel: svc.gw}" @click="svc.gw=!svc.gw">
+      <div class="card-accent brand-gw"></div>
+      <div class="card-title">Google Workspace</div>
+      <div class="card-sub">Business, Enterprise & Frontline plans</div>
+      <div class="card-tag">EUR · USD</div>
+    </div>
+    <div class="card" :class="{sel: svc.ms}" @click="svc.ms=!svc.ms">
+      <div class="card-accent brand-ms"></div>
+      <div class="card-title">Microsoft</div>
+      <div class="card-sub">M365, Teams, Windows 365, Dynamics, Security</div>
+      <div class="card-tag" x-text="region==='ukraine'?'USD · EUR':'EUR'"></div>
+    </div>
+    <div class="card" :class="{sel: svc.adobe}" @click="svc.adobe=!svc.adobe" x-show="region==='europe' || regionScope==='per'">
+      <div class="card-accent brand-adobe"></div>
+      <div class="card-title">Adobe</div>
+      <div class="card-sub">Acrobat Pro, Sign, AI Assistant, Services API</div>
+      <div class="card-tag">EUR · Europe entity</div>
+    </div>
+    <div class="card" :class="{sel: svc.pw}" @click="svc.pw=!svc.pw">
+      <div class="card-accent brand-pw"></div>
+      <div class="card-title">Password Manager</div>
+      <div class="card-sub">Bitwarden, LastPass, 1Password, Spendbase</div>
+      <div class="card-tag">All regions</div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── SECTION 3: GOOGLE WORKSPACE ─────────────── -->
+<div class="sect" x-show="svc.gw" x-transition>
+  <div class="sect-label">Google Workspace</div>
+  <div class="sect-title" style="margin-bottom:20px">Configure Google Workspace licences</div>
+
+  <!-- Per-service region override -->
+  <div class="field" x-show="regionScope==='per'">
+    <div class="lbl">Region for this service</div>
+    <div class="trow">
+      <button class="tb" :class="{on:gwRegion==='europe'}" @click="gwRegion='europe'">Europe (EUR)</button>
+      <button class="tb" :class="{on:gwRegion==='ukraine'}" @click="gwRegion='ukraine'">Ukraine</button>
+      <button class="tb" :class="{on:gwRegion==='row'}" @click="gwRegion='row'">Rest of world (USD)</button>
+    </div>
+  </div>
+
+  <!-- Currency -->
+  <div class="field" x-show="effRegion('gw')==='ukraine' || effRegion('gw')==='row'">
+    <div class="lbl">Currency</div>
+    <div class="trow">
+      <button class="tb" :class="{on:gw.cur==='eur'}" @click="gw.cur='eur'">EUR €</button>
+      <button class="tb" :class="{on:gw.cur==='usd'}" @click="gw.cur='usd'">USD $</button>
+    </div>
+  </div>
+
+  <!-- Billing type -->
+  <div class="field">
+    <div class="lbl">Billing type</div>
+    <div class="trow">
+      <button class="tb" :class="{on:gw.billing==='commit'}" @click="gw.billing='commit'">Annual commitment</button>
+      <button class="tb" :class="{on:gw.billing==='flex'}" @click="gw.billing='flex'">Flex (month-to-month)</button>
+    </div>
+  </div>
+
+  <!-- Plan selector -->
+  <div class="field">
+    <div class="lbl">Plan</div>
+    <select x-model="gw.planId" style="max-width:480px">
+      <option value="">— select a plan —</option>
+      <template x-for="p in gwPlans" :key="p.id">
+        <option :value="p.id" x-text="p.n + ' — ' + gwSym + (gw.billing==='commit'?p.oc.toFixed(2):p.of.toFixed(2)) + '/user/mo (' + gwDiscPct(p) + '% off market)'"></option>
+      </template>
+    </select>
+  </div>
+
+  <!-- Quantity -->
+  <div class="field">
+    <div class="lbl">Number of licences</div>
+    <div class="qty-row">
+      <input type="number" x-model.number="gw.qty" min="1" style="width:90px">
+      <span class="ql">users</span>
+    </div>
+  </div>
+
+  <!-- Savings callout -->
+  <div class="callout callout-save" x-show="gwCalc">
+    <div class="callout-ico">💰</div>
+    <div>
+      <div class="callout-title">Saving <span x-text="gwSym + gwCalc?.saveMo?.toFixed(2)"></span>/mo · <span x-text="gwSym + gwCalc?.saveAn?.toFixed(2)"></span>/yr
+        (<span x-text="gwCalc?.discPct"></span>% off market price)
+      </div>
+      <div style="font-size:12px;color:var(--tx2);margin-top:2px">
+        Market: <span x-text="gwSym + gwCalc?.market?.toFixed(2)"></span>/mo → Our price: <span x-text="gwSym + gwCalc?.our?.toFixed(2)"></span>/mo
+      </div>
+    </div>
+  </div>
+
+  <!-- Upgrade opportunity callout -->
+  <div class="callout callout-up" x-show="gwUpgradeTease" style="margin-top:10px">
+    <div class="callout-ico">⚡</div>
+    <div>
+      <div class="callout-title">Upgrade opportunity available</div>
+      <div style="font-size:12px;margin-top:2px">
+        Clients upgrading <span x-text="gwUpgradeTease?.from"></span> → <span x-text="gwUpgradeTease?.to"></span>
+        get <strong>−20% off the destination plan</strong> instead of the standard discount.
+        Extra saving: <span x-text="gwSym + gwUpgradeTease?.extra?.toFixed(2)"></span>/user/mo vs new licence pricing.
+      </div>
+      <span class="callout-link" @click="applyUpgrade()">Apply upgrade pricing →</span>
+    </div>
+  </div>
+</div>
+
+<!-- ─── SECTION 4: MICROSOFT ─────────────────────── -->
+<div class="sect" x-show="svc.ms" x-transition>
+  <div class="sect-label">Microsoft</div>
+  <div class="sect-title" style="margin-bottom:20px">Configure Microsoft licences</div>
+
+  <!-- Per-service region override -->
+  <div class="field" x-show="regionScope==='per'">
+    <div class="lbl">Region for this service</div>
+    <div class="trow">
+      <button class="tb" :class="{on:msRegion==='europe'}" @click="msRegion='europe';msEntity='eur'">Europe (EUR)</button>
+      <button class="tb" :class="{on:msRegion==='ukraine'}" @click="msRegion='ukraine'">Ukraine (USD)</button>
+    </div>
+  </div>
+
+  <!-- Entity (if Ukraine region) -->
+  <div class="field" x-show="effRegion('ms')==='ukraine'">
+    <div class="lbl">Entity</div>
+    <div class="trow">
+      <button class="tb" :class="{on:msEntity==='eur'}" @click="msEntity='eur'">Europe entity (EUR)</button>
+      <button class="tb" :class="{on:msEntity==='usd'}" @click="msEntity='usd'">Ukraine entity (USD)</button>
+    </div>
+  </div>
+
+  <!-- Current plan / billing cycle -->
+  <div class="field">
+    <div class="lbl">Billing cycle (client preference)</div>
+    <div class="trow" style="flex-wrap:wrap">
+      <button class="tb" :class="{on:msCycle==='P1MM'}" @click="msCycle='P1MM'">Monthly / Monthly</button>
+      <button class="tb" :class="{on:msCycle==='P1YM'}" @click="msCycle='P1YM'" x-show="msEntity==='eur'">Annual commit · pay monthly</button>
+      <button class="tb" :class="{on:msCycle==='P1YA'}" @click="msCycle='P1YA'">Annual commit · pay annually</button>
+      <button class="tb" :class="{on:msCycle==='P3YA'}" @click="msCycle='P3YA'" x-show="msEntity==='eur'">3-year commit · pay annually</button>
+    </div>
+    <div class="note" style="margin-top:8px" x-show="msCycle==='P1YM'">Annual commitment with monthly billing — slightly higher monthly rate than paying annually upfront, but more flexible cash flow.</div>
+    <div class="note" style="margin-top:8px" x-show="msCycle==='P3YA'">3-year commitment with annual billing — maximum discount, price locked for 3 years.</div>
+  </div>
+
+  <!-- Search -->
+  <div class="field">
+    <div class="lbl">Search & add plans</div>
+    <div class="sw">
+      <span class="si">⌕</span>
+      <input type="text" x-model="msSearch" placeholder="Search by name or category…">
+    </div>
+    <div class="plist">
+      <template x-if="filteredMsPlans.length === 0">
+        <div class="empty">No plans found for this billing cycle</div>
+      </template>
+      <template x-for="p in filteredMsPlans" :key="p.id">
+        <div class="pi" @click="addMsItem(p.id)">
+          <div style="flex:1">
+            <div class="pi-cat" x-text="p.c"></div>
+            <div class="pi-name" x-text="p.n"></div>
+          </div>
+          <div class="pi-right">
+            <div class="pi-price" x-text="getMsPrice(p)"></div>
+            <div class="pi-disc" x-text="getMsDisc(p) + '% off market'"></div>
+          </div>
+        </div>
+      </template>
+    </div>
+  </div>
+
+  <!-- Added items -->
+  <div x-show="msItems.length > 0">
+    <div class="lbl">Added plans</div>
+    <template x-for="(item,i) in msItems" :key="i">
+      <div class="irow">
+        <div class="irow-name" x-text="getMsItemName(item)"></div>
+        <span class="irow-tag" x-text="item.cycle + ' · ' + item.entity.toUpperCase()"></span>
+        <div class="irow-price" x-text="getMsItemPrice(item)"></div>
+        <div class="irow-save" x-text="'–' + getMsItemSave(item)"></div>
+        <div class="qty-row" style="flex-shrink:0">
+          <input type="number" :value="item.qty" @input="item.qty=Math.max(1,+$event.target.value||1)" min="1" style="width:70px">
+          <span class="ql">users</span>
+        </div>
+        <button class="rm" @click="msItems.splice(i,1)">×</button>
+      </div>
+    </template>
+    <div class="callout callout-save" x-show="msTotalSavings.an > 0">
+      <div class="callout-ico">💰</div>
+      <div>Saving <strong x-text="fmtMixed(msTotalSavings.mo) + '/mo · ' + fmtMixed(msTotalSavings.an) + '/yr'"></strong> on Microsoft licences</div>
+    </div>
+  </div>
+  <div class="note" x-show="msItems.length===0">Click any plan above to add it. You can add multiple plans with different quantities.</div>
+</div>
+
+<!-- ─── SECTION 5: ADOBE ──────────────────────────── -->
+<div class="sect" x-show="svc.adobe" x-transition>
+  <div class="sect-label">Adobe — Europe entity · EUR</div>
+  <div class="sect-title" style="margin-bottom:20px">Configure Adobe licences</div>
+
+  <!-- Per-service region note -->
+  <div class="note" x-show="regionScope==='per'" style="margin-bottom:16px">Adobe licences are billed through the European entity in EUR.</div>
+
+  <div class="field">
+    <div class="lbl">Search & add products</div>
+    <div class="sw">
+      <span class="si">⌕</span>
+      <input type="text" x-model="adobeSearch" placeholder="Search Adobe products…">
+    </div>
+    <div class="plist">
+      <template x-if="filteredAdobePlans.length===0">
+        <div class="empty">No products found</div>
+      </template>
+      <template x-for="p in filteredAdobePlans" :key="p.id">
+        <div class="pi" @click="addAdobeItem(p.id)">
+          <div style="flex:1">
+            <div class="pi-cat" x-text="p.c"></div>
+            <div class="pi-name" x-text="p.n"></div>
+          </div>
+          <div class="pi-right">
+            <div class="pi-price" x-text="'€' + p.our.toFixed(2) + '/yr'"></div>
+            <div class="pi-disc" x-text="Math.round(((p.rrp-p.our)/p.rrp)*100) + '% off market'"></div>
+          </div>
+        </div>
+      </template>
+    </div>
+  </div>
+
+  <div x-show="adobeItems.length > 0">
+    <div class="lbl">Added products</div>
+    <template x-for="(item,i) in adobeItems" :key="i">
+      <div class="irow" x-data="{get prod(){return D.adobe.find(p=>p.id===item.skuId)}}">
+        <div class="irow-name" x-text="prod?.n"></div>
+        <span class="irow-tag">EUR · Annual</span>
+        <div class="irow-price" x-text="'€' + (prod?.our||0).toFixed(2) + '/yr each'"></div>
+        <div class="irow-save" x-text="'–€' + (((prod?.rrp||0)-(prod?.our||0))*item.qty/12).toFixed(2) + '/mo'"></div>
+        <div class="qty-row" style="flex-shrink:0">
+          <input type="number" :value="item.qty" @input="item.qty=Math.max(1,+$event.target.value||1)" min="1" style="width:70px">
+          <span class="ql" x-text="prod?.unit||'users'"></span>
+        </div>
+        <button class="rm" @click="adobeItems.splice(i,1)">×</button>
+      </div>
+    </template>
+    <div class="callout callout-save" x-show="adobeTotalSavings.an > 0">
+      <div class="callout-ico">💰</div>
+      <div>Saving <strong x-text="'€' + adobeTotalSavings.mo.toFixed(2) + '/mo · €' + adobeTotalSavings.an.toFixed(2) + '/yr'"></strong> on Adobe licences</div>
+    </div>
+  </div>
+  <div class="note" x-show="adobeItems.length===0">All Adobe prices are per user/year on 12-month terms. Click to add.</div>
+</div>
+
+<!-- ─── SECTION 6: PASSWORD MANAGER ──────────────── -->
+<div class="sect" x-show="svc.pw" x-transition>
+  <div class="sect-label">Password Manager</div>
+  <div class="sect-title" style="margin-bottom:20px">Configure password management</div>
+
+  <div class="field">
+    <div class="lbl">Select product</div>
+    <div class="g2">
+      <template x-for="p in D.pw" :key="p.id">
+        <div class="card" :class="{sel: pw.productId===p.id, rec: p.rec}" @click="pw.productId=p.id">
+          <div class="card-accent" :class="'brand-'+p.id"></div>
+          <div x-show="p.rec" class="rec-badge">★ Recommended</div>
+          <div class="card-title" x-text="p.n"></div>
+          <div class="card-sub" x-text="p.desc"></div>
+          <div class="card-tag" x-text="(p.cur==='EUR'?'€':'$') + p.op.toFixed(2) + '/user/mo · market: ' + (p.cur==='EUR'?'€':'$') + p.mp.toFixed(2)"></div>
+        </div>
+      </template>
+    </div>
+  </div>
+
+  <div class="field" x-show="pw.productId">
+    <div class="lbl">Number of licences</div>
+    <div class="qty-row">
+      <input type="number" x-model.number="pw.qty" min="1" style="width:90px">
+      <span class="ql">users</span>
+    </div>
+  </div>
+
+  <div class="callout callout-save" x-show="pwCalc && pwCalc.saveAn > 0">
+    <div class="callout-ico">💰</div>
+    <div>
+      <div class="callout-title">
+        Saving <span x-text="(pwCalc?.sym||'€') + pwCalc?.saveMo?.toFixed(2)"></span>/mo · <span x-text="(pwCalc?.sym||'€') + pwCalc?.saveAn?.toFixed(2)"></span>/yr
+      </div>
+      <div style="font-size:12px;color:var(--tx2);margin-top:2px">
+        Savings vs Spendbase cheapest model at €1.50/user/month.
+        <span x-text="pwCalc?.product?.n"></span> market price (<span x-text="(pwCalc?.sym||'€') + pwCalc?.product?.mp?.toFixed(2)"></span>/user/mo) → Spendbase €1.50/user/mo
+      </div>
+    </div>
+  </div>
+  <div class="note" x-show="pwCalc && pwCalc.saveAn <= 0">Spendbase at €1.50/user/month is already the lowest-cost option in this comparison.</div>
+</div>
+
+<!-- ─── SECTION 7: SUMMARY ────────────────────────── -->
+<div class="sect" x-show="totalSavings.an > 0 || totalSavings.mo > 0" x-transition>
+  <div class="sect-label">Summary</div>
+  <div class="sect-title" style="margin-bottom:20px">Savings breakdown</div>
+
+  <div class="sum-hero">
+    <div class="sum-lbl">Total annual savings with Spendbase</div>
+    <div class="sum-big" x-text="fmtInt(totalSavings.an)"></div>
+    <div class="sum-row2">
+      <div class="sum-stat">
+        <div class="sv" x-text="fmtInt(totalSavings.mo)"></div>
+        <div class="sl">per month</div>
+      </div>
+      <div class="sum-stat">
+        <div class="sv" x-text="fmtInt(totalSavings.an)"></div>
+        <div class="sl">per year</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GW summary block -->
+  <div class="svc-block" x-show="svc.gw && gwCalc">
+    <div class="svc-hdr">
+      <span class="svc-hdr-name">Google Workspace</span>
+      <span class="svc-hdr-save" x-text="gwSym + gwCalc?.saveMo?.toFixed(2) + '/mo · ' + gwSym + gwCalc?.saveAn?.toFixed(2) + '/yr'"></span>
+    </div>
+    <div class="sr-rows">
+      <div class="sr">
+        <div class="sr-name" x-text="gwSelectedPlan?.n + ' × ' + gw.qty + ' users (' + (gw.billing==='commit'?'Annual commit':'Flex') + ')'"></div>
+        <div class="sr-right">
+          <div class="sr-mkt" x-text="'Market: ' + gwSym + gwCalc?.market?.toFixed(2) + '/mo'"></div>
+          <div class="sr-our" x-text="'Our price: ' + gwSym + gwCalc?.our?.toFixed(2) + '/mo'"></div>
+          <div class="sr-save" x-text="'−' + gwCalc?.discPct + '% · Save ' + gwSym + gwCalc?.saveAn?.toFixed(2) + '/yr'"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MS summary block -->
+  <div class="svc-block" x-show="msItems.length > 0">
+    <div class="svc-hdr">
+      <span class="svc-hdr-name">Microsoft</span>
+      <span class="svc-hdr-save" x-text="fmtMixed(msTotalSavings.mo) + '/mo · ' + fmtMixed(msTotalSavings.an) + '/yr'"></span>
+    </div>
+    <div class="sr-rows">
+      <template x-for="(item,i) in msItems" :key="i">
+        <div class="sr" x-data="{get c(){return calcMsItem(item)}}">
+          <div class="sr-name" x-text="c?.name + ' × ' + item.qty + ' (' + item.cycle + ' · ' + item.entity.toUpperCase() + ')'"></div>
+          <div class="sr-right" x-show="c">
+            <div class="sr-mkt" x-text="'Market: ' + c?.sym + c?.saveLine"></div>
+            <div class="sr-our" x-text="'Our: ' + c?.sym + (c?.isAnnual ? (c?.our/item.qty).toFixed(2)+'/yr each' : (c?.our/item.qty).toFixed(2)+'/mo each')"></div>
+            <div class="sr-save" x-text="'−' + c?.discPct + '% · Save ' + c?.sym + c?.saveAn?.toFixed(2) + '/yr'"></div>
+          </div>
+        </div>
+      </template>
+    </div>
+  </div>
+
+  <!-- Adobe summary block -->
+  <div class="svc-block" x-show="svc.adobe && adobeItems.length > 0">
+    <div class="svc-hdr">
+      <span class="svc-hdr-name">Adobe</span>
+      <span class="svc-hdr-save" x-text="'€' + adobeTotalSavings.mo.toFixed(2) + '/mo · €' + adobeTotalSavings.an.toFixed(2) + '/yr'"></span>
+    </div>
+    <div class="sr-rows">
+      <template x-for="(item,i) in adobeItems" :key="i">
+        <div class="sr" x-data="{get c(){return calcAdobeItem(item)}}">
+          <div class="sr-name" x-text="c?.name + ' × ' + item.qty"></div>
+          <div class="sr-right" x-show="c">
+            <div class="sr-mkt" x-text="'Market: €' + c?.market?.toFixed(2) + '/yr'"></div>
+            <div class="sr-our" x-text="'Our: €' + c?.our?.toFixed(2) + '/yr'"></div>
+            <div class="sr-save" x-text="'−' + c?.discPct + '% · Save €' + c?.saveAn?.toFixed(2) + '/yr'"></div>
+          </div>
+        </div>
+      </template>
+    </div>
+  </div>
+
+  <!-- PW summary block -->
+  <div class="svc-block" x-show="svc.pw && pwCalc && pwCalc.saveAn > 0">
+    <div class="svc-hdr">
+      <span class="svc-hdr-name">Password Manager</span>
+      <span class="svc-hdr-save" x-text="(pwCalc?.sym||'€') + pwCalc?.saveMo?.toFixed(2) + '/mo · ' + (pwCalc?.sym||'€') + pwCalc?.saveAn?.toFixed(2) + '/yr'"></span>
+    </div>
+    <div class="sr-rows">
+      <div class="sr" x-show="pwCalc">
+        <div class="sr-name" x-text="pwCalc?.product?.n + ' × ' + pw.qty + ' users (vs Spendbase €1.50/user/mo)'"></div>
+        <div class="sr-right">
+          <div class="sr-mkt" x-text="'Market: ' + (pwCalc?.sym||'€') + pwCalc?.market?.toFixed(2) + '/mo'"></div>
+          <div class="sr-our" x-text="'Spendbase cheapest: €' + (1.50 * pw.qty).toFixed(2) + '/mo'"></div>
+          <div class="sr-save" x-text="'−' + pwCalc?.discPct + '% · Save ' + (pwCalc?.sym||'€') + pwCalc?.saveAn?.toFixed(2) + '/yr'"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Total bar -->
+  <div class="total-bar">
+    <div class="total-bar-name">Combined savings</div>
+    <div class="total-bar-right">
+      <div class="total-bar-mo" x-text="fmtInt(totalSavings.mo) + ' / month'"></div>
+      <div class="total-bar-yr" x-text="fmtInt(totalSavings.an) + ' / year'"></div>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap" class="no-print">
+    <button class="btn" @click="window.print()">Export as PDF</button>
+    <button class="btn btn-sec" @click="resetAll()">Start over</button>
+  </div>
+</div>
+
+</div><!-- #app -->
+
+<script defer src="https://unpkg.com/alpinejs@3.13.3/dist/cdn.min.js"></script>
+<script>
+const D = {
+  gw:{
+    eur:{
+      std:[
+        {id:'bs',n:'Business Starter',fl:8.10,cm:6.80,of:7.13,oc:5.98},
+        {id:'bstd',n:'Business Standard',fl:16.20,cm:13.60,of:14.26,oc:11.97},
+        {id:'bp',n:'Business Plus',fl:25.30,cm:21.10,of:22.26,oc:18.57},
+        {id:'ee',n:'Enterprise Essentials',fl:11.52,cm:9.60,of:10.14,oc:8.45},
+        {id:'eep',n:'Enterprise Essentials Plus',fl:23.04,cm:19.20,of:20.28,oc:16.90},
+        {id:'es',n:'Enterprise Starter',fl:12.70,cm:10.60,of:11.18,oc:9.33},
+        {id:'estd',n:'Enterprise Standard',fl:31.30,cm:26.10,of:27.54,oc:22.97},
+        {id:'ep',n:'Enterprise Plus',fl:40.50,cm:33.80,of:35.64,oc:29.74},
+        {id:'fst',n:'Frontline Starter',fl:5.64,cm:4.70,of:4.96,oc:4.14},
+        {id:'fstd',n:'Frontline Standard',fl:13.80,cm:11.50,of:12.14,oc:10.12},
+        {id:'abs',n:'Archive – Business Starter',fl:2.28,cm:1.90,of:2.01,oc:1.67},
+        {id:'abstd',n:'Archive – Business Standard',fl:3.18,cm:2.65,of:2.80,oc:2.33},
+        {id:'abp',n:'Archive – Business Plus',fl:4.56,cm:3.80,of:4.01,oc:3.34},
+        {id:'aestd',n:'Archive – Enterprise Standard',fl:5.76,cm:4.80,of:5.07,oc:4.22},
+        {id:'aep',n:'Archive – Enterprise Plus',fl:7.92,cm:6.60,of:6.97,oc:5.81},
+      ],
+      up:[
+        {id:'u1',from:'Business Starter',to:'Business Standard',fl:16.20,cm:13.60,of:12.96,oc:10.88},
+        {id:'u2',from:'Business Standard',to:'Business Plus',fl:25.30,cm:21.10,of:20.24,oc:16.88},
+        {id:'u3',from:'Business Plus',to:'Enterprise Standard',fl:31.30,cm:26.10,of:25.04,oc:20.88},
+        {id:'u4',from:'Enterprise Standard',to:'Enterprise Plus',fl:40.50,cm:33.80,of:32.40,oc:27.04},
+      ]
+    },
+    usd:{
+      std:[
+        {id:'bs',n:'Business Starter',fl:8.40,cm:7.00,of:7.98,oc:6.65},
+        {id:'bstd',n:'Business Standard',fl:16.80,cm:14.00,of:15.96,oc:13.30},
+        {id:'bp',n:'Business Plus',fl:26.40,cm:22.00,of:25.08,oc:20.90},
+        {id:'ee',n:'Enterprise Essentials',fl:12.00,cm:10.00,of:11.40,oc:9.50},
+        {id:'eep',n:'Enterprise Essentials Plus',fl:24.00,cm:20.00,of:22.80,oc:19.00},
+        {id:'es',n:'Enterprise Starter',fl:13.20,cm:11.00,of:12.54,oc:10.45},
+        {id:'estd',n:'Enterprise Standard',fl:32.40,cm:27.00,of:30.78,oc:25.65},
+        {id:'ep',n:'Enterprise Plus',fl:42.00,cm:35.00,of:39.90,oc:33.25},
+        {id:'fst',n:'Frontline Starter',fl:6.00,cm:5.00,of:5.70,oc:4.75},
+        {id:'fstd',n:'Frontline Standard',fl:14.40,cm:12.00,of:13.68,oc:11.40},
+      ]
+    }
+  },
+  ms:{
+    eur:[
+      {id:'ms-365-bb-notms',c:'Microsoft 365',n:'M365 Business Basic EEA (No Teams) + Copilot',P1MM:{o:23.90,m:26.40},P1YM:{o:20.91,m:23.10},P1YA:{o:239.01,m:264.00},P3YA:{o:239.01,m:264.00}},
+      {id:'ms-365-bb',c:'Microsoft 365',n:'M365 Business Basic + Copilot',P1MM:{o:25.28,m:28.08},P1YM:null,P1YA:{o:252.81,m:280.80},P3YA:{o:252.81,m:280.80}},
+      {id:'ms-365-bstd-notms',c:'Microsoft 365',n:'M365 Business Standard EEA (No Teams) + Copilot',P1MM:{o:28.03,m:31.44},P1YM:{o:24.52,m:27.51},P1YA:{o:280.32,m:314.40},P3YA:{o:280.32,m:314.40}},
+      {id:'ms-365-bstd',c:'Microsoft 365',n:'M365 Business Standard + Copilot',P1MM:{o:30.79,m:34.80},P1YM:null,P1YA:{o:307.92,m:348.00},P3YA:{o:307.92,m:348.00}},
+      {id:'ms-365-bp-notms',c:'Microsoft 365',n:'M365 Business Premium EEA (No Teams) + Copilot',P1MM:{o:36.22,m:41.40},P1YM:{o:31.68,m:36.23},P1YA:{o:362.11,m:414.00},P3YA:{o:362.11,m:414.00}},
+      {id:'ms-365-bp',c:'Microsoft 365',n:'M365 Business Premium + Copilot',P1MM:{o:38.96,m:44.76},P1YM:null,P1YA:{o:389.66,m:447.60},P3YA:{o:389.66,m:447.60}},
+      {id:'ms-365-f1',c:'Microsoft 365',n:'M365 F1',P1MM:{o:1.87,m:2.28},P1YM:{o:1.64,m:2.00},P1YA:{o:18.71,m:22.80},P3YA:{o:18.71,m:22.80}},
+      {id:'ms-365-f1-eea',c:'Microsoft 365',n:'M365 F1 EEA (No Teams)',P1MM:{o:1.48,m:1.80},P1YM:{o:1.29,m:1.58},P1YA:{o:14.77,m:18.00},P3YA:{o:14.77,m:18.00}},
+      {id:'ms-e7',c:'Microsoft 365 Enterprise',n:'M365 E7',P1MM:{o:90.48,m:110.28},P1YM:{o:79.18,m:96.50},P1YA:{o:904.86,m:1102.80},P3YA:{o:904.86,m:1102.80}},
+      {id:'ms-e7-notms',c:'Microsoft 365 Enterprise',n:'M365 E7 (No Teams) EEA',P1MM:{o:83.20,m:101.40},P1YM:{o:72.80,m:88.73},P1YA:{o:832.00,m:1014.00},P3YA:{o:832.00,m:1014.00}},
+      {id:'ms-agent365',c:'AI & Copilot',n:'Agent 365',P1MM:{o:12.80,m:15.60},P1YM:{o:11.20,m:13.65},P1YA:{o:128.00,m:156.00},P3YA:{o:128.00,m:156.00}},
+      {id:'ms-copilot-biz',c:'AI & Copilot',n:'M365 Copilot Business',P1MM:{o:20.16,m:21.84},P1YM:null,P1YA:{o:201.60,m:218.40},P3YA:{o:201.60,m:218.40}},
+      {id:'ms-teams-prem',c:'Teams & Comms',n:'Microsoft Teams Premium',P1MM:{o:8.79,m:10.44},P1YM:{o:7.69,m:9.14},P1YA:{o:87.92,m:104.40},P3YA:{o:87.92,m:104.40}},
+      {id:'ms-teams-phone',c:'Teams & Comms',n:'Teams Essential with Phone',P1MM:null,P1YM:null,P1YA:{o:102.40,m:124.80},P3YA:{o:102.40,m:124.80}},
+      {id:'ms-adv-comms',c:'Teams & Comms',n:'Advanced Communications',P1MM:{o:10.51,m:12.48},P1YM:{o:9.20,m:10.92},P1YA:{o:105.09,m:124.80},P3YA:{o:105.09,m:124.80}},
+      {id:'ms-def-o365',c:'Security',n:'Defender for Office 365 P2',P1MM:{o:2.55,m:3.12},P1YM:{o:2.22,m:2.73},P1YA:{o:25.60,m:31.20},P3YA:{o:25.47,m:31.20}},
+      {id:'ms-def-ep-e3',c:'Security',n:'Defender Endpoint P2 (M365 E3 add-on)',P1MM:{o:2.63,m:3.12},P1YM:{o:2.29,m:2.73},P1YA:{o:26.27,m:31.20},P3YA:{o:26.27,m:31.20}},
+      {id:'ms-def-suite',c:'Security',n:'Defender Suite for M365 Business Premium',P1MM:{o:8.79,m:10.44},P1YM:{o:7.69,m:9.14},P1YA:{o:87.92,m:104.40},P3YA:{o:87.92,m:104.40}},
+      {id:'ms-purview',c:'Security',n:'Purview Suite for M365 Business Premium',P1MM:{o:8.79,m:10.44},P1YM:{o:7.69,m:9.14},P1YA:{o:87.92,m:104.40},P3YA:{o:87.92,m:104.40}},
+      {id:'ms-def-purview',c:'Security',n:'Defender + Purview Suites for M365 BP',P1MM:{o:13.14,m:15.60},P1YM:{o:11.49,m:13.65},P1YA:{o:131.37,m:156.00},P3YA:{o:131.37,m:156.00}},
+      {id:'ms-entra-p1',c:'Security',n:'Microsoft Entra ID P1',P1MM:{o:5.25,m:6.24},P1YM:{o:4.60,m:5.46},P1YA:{o:52.55,m:62.40},P3YA:{o:52.55,m:62.40}},
+      {id:'ms-entra-p2',c:'Security',n:'Microsoft Entra ID P2',P1MM:{o:7.88,m:9.36},P1YM:{o:6.89,m:8.19},P1YA:{o:78.82,m:93.60},P3YA:{o:78.82,m:93.60}},
+      {id:'ms-entra-p2-e3',c:'Security',n:'Entra P2 Add-On for M365 E3',P1MM:{o:3.03,m:3.60},P1YM:{o:2.65,m:3.15},P1YA:{o:30.32,m:36.00},P3YA:{o:30.32,m:36.00}},
+      {id:'ms-audit',c:'Security',n:'10-Year Audit Log Retention',P1MM:{o:1.75,m:2.08},P1YM:{o:1.53,m:1.82},P1YA:{o:17.48,m:20.76},P3YA:{o:17.48,m:20.76}},
+      {id:'ms-audit-flw',c:'Security',n:'10-Year Audit Log (FLW)',P1MM:{o:1.17,m:1.39},P1YM:{o:1.02,m:1.22},P1YA:{o:11.73,m:13.92},P3YA:{o:11.73,m:13.92}},
+      {id:'ms-ediscov',c:'Security',n:'Advanced eDiscovery Storage',P1MM:{o:87.52,m:103.92},P1YM:{o:76.57,m:90.93},P1YA:{o:875.12,m:1039.20},P3YA:{o:875.12,m:1039.20}},
+      {id:'ms-proj5',c:'Productivity',n:'Project Plan 5',P1MM:{o:26.27,m:31.20},P1YM:{o:22.99,m:27.30},P1YA:{o:262.74,m:312.00},P3YA:{o:262.74,m:312.00}},
+      {id:'ms-w365-2-4-64',c:'Windows 365',n:'Windows 365 Biz 2vCPU/4GB/64GB',P1MM:{o:19.69,m:24.00},P1YM:{o:18.61,m:22.68},P1YA:{o:212.68,m:259.20},P3YA:{o:212.68,m:259.20}},
+      {id:'ms-w365-2-4-128',c:'Windows 365',n:'Windows 365 Biz 2vCPU/4GB/128GB',P1MM:{o:21.50,m:26.20},P1YM:{o:20.32,m:24.76},P1YA:{o:232.17,m:282.96},P3YA:{o:232.17,m:282.96}},
+      {id:'ms-w365-2-8-128',c:'Windows 365',n:'Windows 365 Biz 2vCPU/8GB/128GB',P1MM:{o:27.65,m:33.70},P1YM:{o:26.13,m:31.85},P1YA:{o:298.64,m:363.96},P3YA:{o:298.64,m:363.96}},
+      {id:'ms-w365-2-8-256',c:'Windows 365',n:'Windows 365 Biz 2vCPU/8GB/256GB',P1MM:{o:33.15,m:40.40},P1YM:{o:31.32,m:38.18},P1YA:{o:358.01,m:436.32},P3YA:{o:358.01,m:436.32}},
+      {id:'ms-w365-4-16-128',c:'Windows 365',n:'Windows 365 Biz 4vCPU/16GB/128GB',P1MM:{o:42.99,m:52.40},P1YM:{o:40.63,m:49.52},P1YA:{o:464.35,m:565.92},P3YA:{o:464.35,m:565.92}},
+      {id:'ms-w365-4-16-256',c:'Windows 365',n:'Windows 365 Biz 4vCPU/16GB/256GB',P1MM:{o:48.49,m:59.10},P1YM:{o:45.83,m:55.85},P1YA:{o:523.71,m:638.28},P3YA:{o:523.71,m:638.28}},
+      {id:'ms-w365-4-16-512',c:'Windows 365',n:'Windows 365 Biz 4vCPU/16GB/512GB',P1MM:{o:64.49,m:78.60},P1YM:{o:60.94,m:74.28},P1YA:{o:696.51,m:848.88},P3YA:{o:696.51,m:848.88}},
+      {id:'ms-w365-8-32-128',c:'Windows 365',n:'Windows 365 Biz 8vCPU/32GB/128GB',P1MM:{o:78.03,m:95.10},P1YM:{o:73.74,m:89.87},P1YA:{o:842.73,m:1027.08},P3YA:{o:842.73,m:1027.08}},
+      {id:'ms-w365-8-32-256',c:'Windows 365',n:'Windows 365 Biz 8vCPU/32GB/256GB',P1MM:{o:83.53,m:101.80},P1YM:{o:78.93,m:96.20},P1YA:{o:902.10,m:1099.44},P3YA:{o:902.10,m:1099.44}},
+      {id:'ms-w365-8-32-512',c:'Windows 365',n:'Windows 365 Biz 8vCPU/32GB/512GB',P1MM:{o:99.53,m:121.30},P1YM:{o:94.05,m:114.63},P1YA:{o:1074.90,m:1310.04},P3YA:{o:1074.90,m:1310.04}},
+      {id:'ms-w365-16-64-512',c:'Windows 365',n:'Windows 365 Biz 16vCPU/64GB/512GB',P1MM:{o:172.81,m:210.40},P1YM:{o:163.31,m:198.83},P1YA:{o:1866.39,m:2272.32},P3YA:{o:1866.39,m:2272.32}},
+      {id:'ms-w365-16-64-1tb',c:'Windows 365',n:'Windows 365 Biz 16vCPU/64GB/1TB',P1MM:{o:196.14,m:238.80},P1YM:{o:185.35,m:225.67},P1YA:{o:2118.31,m:2579.04},P3YA:{o:2118.31,m:2579.04}},
+      {id:'ms-d365-ess',c:'Dynamics 365',n:'D365 BC Essentials',P1MM:{o:59.70,m:83.16},P1YM:{o:52.25,m:72.77},P1YA:{o:597.05,m:831.60},P3YA:{o:597.05,m:831.60}},
+      {id:'ms-d365-prem',c:'Dynamics 365',n:'D365 BC Premium',P1MM:null,P1YM:{o:71.85,m:100.07},P1YA:{o:821.05,m:1143.60},P3YA:{o:821.05,m:1143.60}},
+      {id:'ms-d365-team',c:'Dynamics 365',n:'D365 BC Team Members',P1MM:null,P1YM:{o:5.20,m:7.25},P1YA:{o:59.45,m:82.80},P3YA:{o:59.45,m:82.80}},
+      {id:'ms-d365-dev',c:'Dynamics 365',n:'D365 BC Device',P1MM:{o:33.60,m:46.80},P1YM:{o:29.41,m:40.95},P1YA:{o:336.00,m:468.00},P3YA:{o:336.00,m:468.00}},
+      {id:'ms-d365-cc',c:'Dynamics 365',n:'D365 Contact Center Add-on (Customer Service Ent.)',P1MM:null,P1YM:null,P1YA:null,P3YA:{o:720.00,m:936.00}},
+      {id:'ms-d365-csprem',c:'Dynamics 365',n:'D365 Customer Service Premium',P1MM:null,P1YM:null,P1YA:null,P3YA:{o:1560.00,m:2028.00}},
+      {id:'ms-dv-db',c:'Power Platform',n:'Dataverse Database Capacity',P1MM:{o:32.87,m:41.64},P1YM:{o:28.77,m:36.43},P1YA:{o:328.74,m:416.40},P3YA:{o:328.74,m:416.40}},
+      {id:'ms-dv-file',c:'Power Platform',n:'Dataverse File Capacity',P1MM:{o:1.64,m:2.08},P1YM:{o:1.43,m:1.82},P1YA:{o:16.39,m:20.76},P3YA:{o:16.39,m:20.76}},
+      {id:'ms-dv-log',c:'Power Platform',n:'Dataverse Log Capacity',P1MM:{o:8.24,m:10.44},P1YM:{o:7.21,m:9.14},P1YA:{o:82.42,m:104.40},P3YA:{o:82.42,m:104.40}},
+      {id:'ms-tev-5k',c:'Teams Events',n:'Teams Events Pack – 5k attendees',P1MM:{o:1145.83,m:1403.64},P1YM:null,P1YA:null,P3YA:null},
+      {id:'ms-tev-10k',c:'Teams Events',n:'Teams Events Pack – 10k attendees',P1MM:{o:3013.22,m:3691.20},P1YM:null,P1YA:null,P3YA:null},
+      {id:'ms-tev-20k',c:'Teams Events',n:'Teams Events Pack – 20k attendees',P1MM:{o:4519.84,m:5536.80},P1YM:null,P1YA:null,P3YA:null},
+      {id:'ms-tev-35k',c:'Teams Events',n:'Teams Events Pack – 35k attendees',P1MM:{o:8286.66,m:10151.16},P1YM:null,P1YA:null,P3YA:null},
+      {id:'ms-tev-50k',c:'Teams Events',n:'Teams Events Pack – 50k attendees',P1MM:{o:12052.80,m:14764.68},P1YM:null,P1YA:null,P3YA:null},
+    ],
+    usd:[
+      {id:'ms-u-adv-comms',c:'Teams & Comms',n:'Advanced Communications',P1MM:{o:11.87,m:14.40},P1YA:{o:118.66,m:144.00}},
+      {id:'ms-u-ediscov',c:'Security',n:'Advanced eDiscovery Storage',P1MM:{o:98.88,m:120.00},P1YA:{o:988.80,m:1200.00}},
+      {id:'ms-u-audit',c:'Security',n:'10-Year Audit Log Retention',P1MM:{o:1.98,m:2.40},P1YA:{o:19.78,m:24.00}},
+      {id:'ms-u-def-o365',c:'Security',n:'Defender for Office 365 P2',P1MM:{o:2.97,m:3.60},P1YA:{o:29.66,m:36.00}},
+      {id:'ms-u-def-ep',c:'Security',n:'Defender Endpoint P2 (M365 E3 add-on)',P1MM:{o:2.97,m:3.60},P1YA:{o:29.66,m:36.00}},
+      {id:'ms-u-entra-p1',c:'Security',n:'Azure AD / Entra ID P1',P1MM:null,P1YA:{o:59.33,m:72.00}},
+      {id:'ms-u-aip-p1',c:'Security',n:'Azure Information Protection P1',P1MM:{o:1.98,m:2.40},P1YA:{o:19.78,m:24.00}},
+      {id:'ms-u-d365-ess',c:'Dynamics 365',n:'D365 BC Essentials',P1MM:{o:69.22,m:96.00},P1YA:{o:692.16,m:960.00}},
+      {id:'ms-u-d365-prem',c:'Dynamics 365',n:'D365 BC Premium',P1MM:{o:95.17,m:132.00},P1YA:null},
+      {id:'ms-u-d365-dev',c:'Dynamics 365',n:'D365 BC Device',P1MM:{o:38.93,m:54.00},P1YA:{o:389.34,m:540.00}},
+      {id:'ms-u-ai-builder',c:'Power Platform',n:'AI Builder Capacity Add-On T1',P1MM:{o:556.20,m:600.00},P1YA:{o:5562.00,m:6000.00}},
+      {id:'ms-u-dv-db',c:'Power Platform',n:'Dataverse Database Capacity',P1MM:{o:37.08,m:48.00},P1YA:{o:370.80,m:480.00}},
+      {id:'ms-u-dv-file',c:'Power Platform',n:'Dataverse File Capacity',P1MM:{o:1.85,m:2.40},P1YA:{o:18.54,m:24.00}},
+      {id:'ms-u-dv-log',c:'Power Platform',n:'Dataverse Log Capacity',P1MM:{o:9.27,m:12.00},P1YA:{o:92.70,m:120.00}},
+    ]
+  },
+  adobe:[
+    // Acrobat Pro Enterprise
+    {id:'ab-acp-ent-1',c:'Acrobat Pro Enterprise',n:'Acrobat Pro Enterprise (1–9 users)',rrp:335.88,our:325.89,unit:'users'},
+    {id:'ab-acp-ent-10',c:'Acrobat Pro Enterprise',n:'Acrobat Pro Enterprise (10–49 users)',rrp:319.08,our:309.59,unit:'users'},
+    {id:'ab-acp-ent-50',c:'Acrobat Pro Enterprise',n:'Acrobat Pro Enterprise (50–99 users)',rrp:302.28,our:293.29,unit:'users'},
+    {id:'ab-acp-ent-100',c:'Acrobat Pro Enterprise',n:'Acrobat Pro Enterprise (100+ users)',rrp:285.48,our:276.99,unit:'users'},
+    {id:'ab-acp-ent-h100',c:'Acrobat Pro Enterprise',n:'Acrobat Pro Enterprise HGO 100 MOQ',rrp:218.28,our:211.79,unit:'users'},
+    {id:'ab-acp-ent-h250',c:'Acrobat Pro Enterprise',n:'Acrobat Pro Enterprise HGO 250 MOQ',rrp:201.48,our:195.49,unit:'users'},
+    {id:'ab-acp-ent-h500',c:'Acrobat Pro Enterprise',n:'Acrobat Pro Enterprise HGO 500 MOQ',rrp:184.68,our:179.18,unit:'users'},
+    // Acrobat Pro Teams
+    {id:'ab-acp-tm-1',c:'Acrobat Pro Teams',n:'Acrobat Pro Teams (1–9 users)',rrp:287.88,our:279.32,unit:'users'},
+    {id:'ab-acp-tm-10',c:'Acrobat Pro Teams',n:'Acrobat Pro Teams (10–24 users)',rrp:273.48,our:265.35,unit:'users'},
+    {id:'ab-acp-tm-25',c:'Acrobat Pro Teams',n:'Acrobat Pro Teams 25 Pack',rrp:247.56,our:240.22,unit:'users'},
+    {id:'ab-acp-tm-50',c:'Acrobat Pro Teams',n:'Acrobat Pro Teams 50 Pack',rrp:221.64,our:215.10,unit:'users'},
+    {id:'ab-acp-tm-h100',c:'Acrobat Pro Teams',n:'Acrobat Pro Teams HGO 100 MOQ',rrp:187.08,our:181.51,unit:'users'},
+    {id:'ab-acp-tm-h250',c:'Acrobat Pro Teams',n:'Acrobat Pro Teams HGO 250 MOQ',rrp:172.68,our:167.54,unit:'users'},
+    {id:'ab-acp-tm-h500',c:'Acrobat Pro Teams',n:'Acrobat Pro Teams HGO 500 MOQ',rrp:158.28,our:153.57,unit:'users'},
+    // Acrobat Pro 2024
+    {id:'ab-acp-2024-ent',c:'Acrobat Pro 2024',n:'Acrobat Pro 2024 Enterprise',rrp:134.04,our:130.04,unit:'users'},
+    {id:'ab-acp-2024-tm',c:'Acrobat Pro 2024',n:'Acrobat Pro 2024 Teams',rrp:134.04,our:130.04,unit:'users'},
+    // AI Assistant
+    {id:'ab-ai-ent',c:'AI Assistant for Acrobat',n:'AI Assistant for Acrobat Enterprise',rrp:60.36,our:52.46,unit:'users'},
+    {id:'ab-ai-tm',c:'AI Assistant for Acrobat',n:'AI Assistant for Acrobat Teams',rrp:59.64,our:51.72,unit:'users'},
+    // Generative Credits
+    {id:'ab-gen-2k-e',c:'Generative Credits',n:'2,000 Monthly Generative Credits (Enterprise)',rrp:92.40,our:89.59,unit:'users'},
+    {id:'ab-gen-2k-t',c:'Generative Credits',n:'2,000 Monthly Generative Credits (Teams)',rrp:92.40,our:89.59,unit:'users'},
+    {id:'ab-gen-7k-e',c:'Generative Credits',n:'7,000 Monthly Generative Credits (Enterprise)',rrp:277.20,our:268.90,unit:'users'},
+    {id:'ab-gen-7k-t',c:'Generative Credits',n:'7,000 Monthly Generative Credits (Teams)',rrp:277.20,our:268.90,unit:'users'},
+    {id:'ab-gen-50k-e',c:'Generative Credits',n:'50,000 Monthly Generative Credits (Enterprise)',rrp:1848.72,our:1793.81,unit:'users'},
+    {id:'ab-gen-50k-t',c:'Generative Credits',n:'50,000 Monthly Generative Credits (Teams)',rrp:1848.72,our:1793.81,unit:'users'},
+    // Acrobat Services API
+    {id:'ab-api-25k',c:'Acrobat Services API',n:'Acrobat Services API – 25K Transactions/yr',rrp:1875.00,our:1819.30,unit:'subscriptions'},
+    {id:'ab-api-75k',c:'Acrobat Services API',n:'Acrobat Services API – 75K Transactions/yr',rrp:5250.00,our:5093.90,unit:'subscriptions'},
+    {id:'ab-api-250k',c:'Acrobat Services API',n:'Acrobat Services API – 250K Transactions/yr',rrp:16249.92,our:15766.93,unit:'subscriptions'},
+    {id:'ab-api-500k',c:'Acrobat Services API',n:'Acrobat Services API – 500K Transactions/yr',rrp:30000.00,our:29108.36,unit:'subscriptions'},
+    {id:'ab-api-750k',c:'Acrobat Services API',n:'Acrobat Services API – 750K Transactions/yr',rrp:41250.00,our:40023.94,unit:'subscriptions'},
+    // Acrobat Sign for Business – User-based (AWS/Azure)
+    {id:'ab-sign-biz-1',c:'Acrobat Sign Business',n:'Acrobat Sign Business – 1–9 users/yr',rrp:360.00,our:275.76,unit:'users'},
+    {id:'ab-sign-biz-10',c:'Acrobat Sign Business',n:'Acrobat Sign Business – 10–49 users/yr',rrp:336.00,our:257.38,unit:'users'},
+    {id:'ab-sign-biz-50',c:'Acrobat Sign Business',n:'Acrobat Sign Business – 50+ users/yr',rrp:312.00,our:238.99,unit:'users'},
+    // Acrobat Sign for Business – Enterprise tiers
+    {id:'ab-sign-ent-1',c:'Acrobat Sign Enterprise',n:'Acrobat Sign Enterprise – 1–9 users/yr',rrp:480.00,our:367.68,unit:'users'},
+    {id:'ab-sign-ent-10',c:'Acrobat Sign Enterprise',n:'Acrobat Sign Enterprise – 10–49 users/yr',rrp:456.00,our:349.30,unit:'users'},
+    {id:'ab-sign-ent-50',c:'Acrobat Sign Enterprise',n:'Acrobat Sign Enterprise – 50–99 users/yr',rrp:432.00,our:330.92,unit:'users'},
+    {id:'ab-sign-ent-100',c:'Acrobat Sign Enterprise',n:'Acrobat Sign Enterprise – 100+ users/yr',rrp:408.00,our:312.53,unit:'users'},
+    // Acrobat Sign 20% Acquisition Standing Offer
+    {id:'ab-sign-acq-1',c:'Acrobat Sign Acquisition Offer',n:'Acrobat Sign Acquisition Offer – 1–9 users/yr',rrp:384.00,our:294.15,unit:'users'},
+    {id:'ab-sign-acq-10',c:'Acrobat Sign Acquisition Offer',n:'Acrobat Sign Acquisition Offer – 10+ users/yr',rrp:288.00,our:220.61,unit:'users'},
+    {id:'ab-sign-acq-25',c:'Acrobat Sign Acquisition Offer',n:'Acrobat Sign Acquisition Offer – 25+ users/yr',rrp:268.80,our:205.90,unit:'users'},
+    {id:'ab-sign-acq-50',c:'Acrobat Sign Acquisition Offer',n:'Acrobat Sign Acquisition Offer – 50+ users/yr',rrp:249.60,our:191.20,unit:'users'},
+    // Acrobat Sign per-transaction
+    {id:'ab-sign-trx-std',c:'Acrobat Sign Transactions',n:'Acrobat Sign per-transaction – standard (<1k/mo)',rrp:3.48,our:2.67,unit:'transactions/mo'},
+    {id:'ab-sign-trx-1k',c:'Acrobat Sign Transactions',n:'Acrobat Sign per-transaction – volume (1k+/mo)',rrp:2.44,our:1.87,unit:'transactions/mo'},
+    {id:'ab-sign-trx-2k',c:'Acrobat Sign Transactions',n:'Acrobat Sign per-transaction – volume (2.5k+/mo)',rrp:2.09,our:1.60,unit:'transactions/mo'},
+    {id:'ab-sign-trx-5k',c:'Acrobat Sign Transactions',n:'Acrobat Sign per-transaction – volume (5k+/mo)',rrp:1.91,our:1.47,unit:'transactions/mo'},
+    {id:'ab-sign-trx-bundle',c:'Acrobat Sign Transactions',n:'Acrobat Sign 1,500-transaction Starter Bundle',rrp:1.46,our:1.12,unit:'transactions/mo'},
+    // Acrobat Sign MSG Delivery Add-On
+    {id:'ab-sign-msg-std',c:'Acrobat Sign MSG Delivery',n:'Sign MSG Delivery Add-On (<1k trans/mo)',rrp:2.00,our:1.53,unit:'transactions/mo'},
+    {id:'ab-sign-msg-1k',c:'Acrobat Sign MSG Delivery',n:'Sign MSG Delivery Add-On (1k+/mo)',rrp:1.40,our:1.07,unit:'transactions/mo'},
+    {id:'ab-sign-msg-2k',c:'Acrobat Sign MSG Delivery',n:'Sign MSG Delivery Add-On (2.5k+/mo)',rrp:1.20,our:0.92,unit:'transactions/mo'},
+    {id:'ab-sign-msg-5k',c:'Acrobat Sign MSG Delivery',n:'Sign MSG Delivery Add-On (5k+/mo)',rrp:1.10,our:0.85,unit:'transactions/mo'},
+  ],
+  pw:[
+    {id:'bitwarden',n:'Bitwarden Enterprise',mp:6.00,op:5.40,cur:'USD',disc:10,rec:false,desc:'Open-source, highly secure password vault'},
+    {id:'lastpass',n:'LastPass Business',mp:6.50,op:4.50,cur:'EUR',disc:30.77,rec:false,desc:'Easy to use, wide enterprise integrations'},
+    {id:'1password',n:'1Password Business',mp:8.00,op:6.50,cur:'EUR',disc:18.75,rec:false,desc:'Premium UX, shared team vaults'},
+    {id:'spendbase',n:'Spendbase Password Manager',mp:3.00,op:3.00,cur:'EUR',disc:0,rec:true,desc:'Built for SaaS-first teams, from €1.50/user/mo'},
+  ]
+};
+
+function calcApp() {
+  return {
+    D,
+    region: null,
+    regionScope: 'all',
+    gwRegion: null,
+    msRegion: null,
+    svc: {gw:false,ms:false,adobe:false,pw:false},
+    gw: {cur:'eur', billing:'commit', planId:'', qty:1},
+    msItems: [],
+    msCycle: 'P1YA',
+    msEntity: 'eur',
+    msSearch: '',
+    adobeItems: [],
+    adobeSearch: '',
+    pw: {productId: null, qty: 1},
+
+    setRegion(r) {
+      this.region = r;
+      this.gwRegion = r;
+      this.msRegion = r;
+      if (r === 'europe') { this.gw.cur = 'eur'; this.msEntity = 'eur'; }
+      else if (r === 'ukraine') { this.msEntity = 'usd'; }
+      else if (r === 'row') { this.gw.cur = 'usd'; }
+    },
+
+    effRegion(svc) {
+      if (this.regionScope === 'per') {
+        if (svc === 'gw') return this.gwRegion || this.region;
+        if (svc === 'ms') return this.msRegion || this.region;
+      }
+      return this.region;
+    },
+
+    get gwSym() {
+      return this.gw.cur === 'eur' ? '€' : '$';
+    },
+
+    get gwPlans() {
+      const plans = this.gw.cur === 'eur' ? D.gw.eur.std : D.gw.usd.std;
+      return plans;
+    },
+
+    gwDiscPct(p) {
+      const mkt = this.gw.billing === 'commit' ? p.cm : p.fl;
+      const our = this.gw.billing === 'commit' ? p.oc : p.of;
+      return Math.round(((mkt - our) / mkt) * 100);
+    },
+
+    get gwSelectedPlan() {
+      if (!this.gw.planId) return null;
+      return this.gwPlans.find(p => p.id === this.gw.planId) || null;
+    },
+
+    get gwCalc() {
+      const p = this.gwSelectedPlan;
+      if (!p) return null;
+      const mkt = this.gw.billing === 'commit' ? p.cm : p.fl;
+      const our = this.gw.billing === 'commit' ? p.oc : p.of;
+      const mo_m = mkt * this.gw.qty, mo_o = our * this.gw.qty;
+      return {
+        sym: this.gwSym,
+        market: mo_m, our: mo_o,
+        saveMo: mo_m - mo_o,
+        saveAn: (mo_m - mo_o) * 12,
+        discPct: Math.round(((mkt - our) / mkt) * 100)
+      };
+    },
+
+    get gwUpgradeTease() {
+      const p = this.gwSelectedPlan;
+      if (!p || this.gw.cur !== 'eur') return null;
+      const up = D.gw.eur.up.find(u => u.from === p.n);
+      if (!up) return null;
+      const newPrice = this.gw.billing === 'commit' ? up.cm : up.fl;
+      const upgradePrice = this.gw.billing === 'commit' ? up.oc : up.of;
+      return {
+        from: up.from,
+        to: up.to,
+        extra: +(newPrice - upgradePrice).toFixed(2),
+        upId: up.id
+      };
+    },
+
+    applyUpgrade() {
+      const up = this.gwUpgradeTease;
+      if (!up) return;
+      const found = D.gw.eur.up.find(u => u.id === up.upId);
+      if (!found) return;
+      // Switch to upgrade pricing — select the upgrade plan from std matching destination
+      const dest = D.gw.eur.std.find(p => p.n === found.to);
+      if (dest) {
+        // Override std plan prices with upgrade prices
+        this._gwUpgradeOverride = { planId: dest.id, of: found.of, oc: found.oc };
+        this.gw.planId = '_upgrade_' + found.id;
+      }
+    },
+
+    get filteredMsPlans() {
+      const search = this.msSearch.toLowerCase().trim();
+      const src = this.msEntity === 'eur' ? D.ms.eur : D.ms.usd;
+      return src.filter(s => {
+        if (!s[this.msCycle]) return false;
+        if (!search) return true;
+        return s.n.toLowerCase().includes(search) || s.c.toLowerCase().includes(search);
+      });
+    },
+
+    getMsPrice(sku) {
+      const p = sku[this.msCycle];
+      if (!p) return '—';
+      const sym = this.msEntity === 'eur' ? '€' : '$';
+      const isAnnual = this.msCycle === 'P1YA' || this.msCycle === 'P3YA';
+      const v = isAnnual ? p.o / 12 : p.o;
+      return sym + v.toFixed(2) + '/mo eq.';
+    },
+
+    getMsDisc(sku) {
+      const p = sku[this.msCycle];
+      if (!p) return 0;
+      return Math.round(((p.m - p.o) / p.m) * 100);
+    },
+
+    addMsItem(skuId) {
+      const exists = this.msItems.find(i => i.skuId === skuId && i.cycle === this.msCycle && i.entity === this.msEntity);
+      if (exists) { exists.qty++; return; }
+      this.msItems.push({skuId, qty:1, cycle:this.msCycle, entity:this.msEntity});
+    },
+
+    getMsItemName(item) {
+      const src = item.entity === 'eur' ? D.ms.eur : D.ms.usd;
+      return src.find(s => s.id === item.skuId)?.n || item.skuId;
+    },
+
+    getMsItemPrice(item) {
+      const src = item.entity === 'eur' ? D.ms.eur : D.ms.usd;
+      const sku = src.find(s => s.id === item.skuId);
+      if (!sku) return '—';
+      const p = sku[item.cycle];
+      if (!p) return '—';
+      const sym = item.entity === 'eur' ? '€' : '$';
+      const isAnn = item.cycle === 'P1YA' || item.cycle === 'P3YA';
+      const v = isAnn ? p.o * item.qty / 12 : p.o * item.qty;
+      return sym + v.toFixed(2) + '/mo';
+    },
+
+    getMsItemSave(item) {
+      const c = this.calcMsItem(item);
+      if (!c) return '—';
+      return c.sym + c.saveMo.toFixed(2) + '/mo';
+    },
+
+    calcMsItem(item) {
+      const src = item.entity === 'eur' ? D.ms.eur : D.ms.usd;
+      const sku = src.find(s => s.id === item.skuId);
+      if (!sku) return null;
+      const sym = item.entity === 'eur' ? '€' : '$';
+      const p = sku[item.cycle];
+      if (!p) return null;
+      const isAnn = item.cycle === 'P1YA' || item.cycle === 'P3YA';
+      if (isAnn) {
+        const anM = p.m * item.qty, anO = p.o * item.qty;
+        return {sym, market:anM, our:anO, saveMo:(anM-anO)/12, saveAn:anM-anO, isAnnual:true, name:sku.n, discPct:Math.round(((p.m-p.o)/p.m)*100),
+          saveLine: (anM/item.qty).toFixed(2)+'/yr each'};
+      }
+      const moM = p.m * item.qty, moO = p.o * item.qty;
+      return {sym, market:moM, our:moO, saveMo:moM-moO, saveAn:(moM-moO)*12, isAnnual:false, name:sku.n, discPct:Math.round(((p.m-p.o)/p.m)*100),
+        saveLine:(moM/item.qty).toFixed(2)+'/mo each'};
+    },
+
+    get msTotalSavings() {
+      let mo=0, an=0;
+      this.msItems.forEach(item => {
+        const c = this.calcMsItem(item);
+        if (c) { mo += c.saveMo; an += c.saveAn; }
+      });
+      return {mo, an, sym: this.msEntity==='eur'?'€':'$'};
+    },
+
+    fmtMixed(v) {
+      const sym = this.msTotalSavings.sym;
+      return sym + Math.abs(v).toFixed(2);
+    },
+
+    get filteredAdobePlans() {
+      const search = this.adobeSearch.toLowerCase().trim();
+      if (!search) return D.adobe;
+      return D.adobe.filter(p => p.n.toLowerCase().includes(search) || p.c.toLowerCase().includes(search));
+    },
+
+    addAdobeItem(skuId) {
+      const exists = this.adobeItems.find(i => i.skuId === skuId);
+      if (exists) { exists.qty++; return; }
+      this.adobeItems.push({skuId, qty:1});
+    },
+
+    calcAdobeItem(item) {
+      const prod = D.adobe.find(p => p.id === item.skuId);
+      if (!prod) return null;
+      const anM = prod.rrp * item.qty, anO = prod.our * item.qty;
+      return {sym:'€', market:anM, our:anO, saveMo:(anM-anO)/12, saveAn:anM-anO, isAnnual:true, name:prod.n, discPct:Math.round(((prod.rrp-prod.our)/prod.rrp)*100)};
+    },
+
+    get adobeTotalSavings() {
+      let mo=0, an=0;
+      this.adobeItems.forEach(item => {
+        const c = this.calcAdobeItem(item);
+        if (c) { mo += c.saveMo; an += c.saveAn; }
+      });
+      return {mo, an};
+    },
+
+    get pwCalc() {
+      if (!this.pw.productId) return null;
+      const prod = D.pw.find(p => p.id === this.pw.productId);
+      if (!prod) return null;
+      const sym = prod.cur === 'EUR' ? '€' : '$';
+      const spendbaseMin = 1.50;
+      const market = prod.mp * this.pw.qty;
+      const spendbaseCost = spendbaseMin * this.pw.qty;
+      const saveMo = market - spendbaseCost;
+      return {
+        sym, product: prod,
+        market, our: prod.op * this.pw.qty,
+        spendbaseCost,
+        saveMo: Math.max(0, saveMo),
+        saveAn: Math.max(0, saveMo * 12),
+        discPct: Math.round(((prod.mp - spendbaseMin) / prod.mp) * 100)
+      };
+    },
+
+    get totalSavings() {
+      let mo=0, an=0;
+      if (this.svc.gw && this.gwCalc) { mo += this.gwCalc.saveMo; an += this.gwCalc.saveAn; }
+      this.msItems.forEach(item => { const c=this.calcMsItem(item); if(c){mo+=c.saveMo;an+=c.saveAn;} });
+      this.adobeItems.forEach(item => { const c=this.calcAdobeItem(item); if(c){mo+=c.saveMo;an+=c.saveAn;} });
+      if (this.svc.pw && this.pwCalc) { mo += this.pwCalc.saveMo; an += this.pwCalc.saveAn; }
+      return {mo, an};
+    },
+
+    fmtInt(v, s='€') { return s + Math.round(v).toLocaleString(); },
+
+    resetAll() {
+      this.region=null; this.regionScope='all'; this.gwRegion=null; this.msRegion=null;
+      this.svc={gw:false,ms:false,adobe:false,pw:false};
+      this.gw={cur:'eur',billing:'commit',planId:'',qty:1};
+      this.msItems=[]; this.msCycle='P1YA'; this.msEntity='eur'; this.msSearch='';
+      this.adobeItems=[]; this.adobeSearch='';
+      this.pw={productId:null,qty:1};
+    }
+  };
+}
+</script>
+</body>
+</html>
