@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Software Pricing Calculator</title>
+<style>
+[x-cloak]{display:none!important}
+:root{--bg:#070E1C;--s:#0D1B36;--s2:#0F2040;--s3:#152850;--bd:#1D3357;--ac:#3B7BF6;--acl:rgba(59,123,246,.12);--gr:#12C07C;--grl:rgba(18,192,124,.11);--tx:#EDF2FC;--tx2:#8BA3C3;--tx3:#4E6285;--ra:9px;--ra2:14px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--tx);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:15px;line-height:1.5}
+#app{max-width:820px;margin:0 auto;padding:0 20px 80px}
+.hdr{padding:28px 0 20px;border-bottom:1px solid var(--bd)}
+.hdr-inner{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.logo-text{font-size:20px;font-weight:600;letter-spacing:-.3px}
+.total-pill{background:var(--grl);border:1px solid var(--gr);border-radius:40px;padding:7px 18px;font-size:14px;color:var(--gr);font-weight:500}
+.sect{border-bottom:1px solid var(--bd);padding:28px 0}
+.sect:last-child{border-bottom:none}
+.sect-label{font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:var(--tx3);font-weight:500;margin-bottom:14px}
+.sect-title{font-size:19px;font-weight:500;margin-bottom:6px}
+.sect-sub{font-size:13px;color:var(--tx2);margin-bottom:20px}
+.card{background:var(--s);border:1.5px solid var(--bd);border-radius:var(--ra2);padding:16px 18px;cursor:pointer;transition:border-color .18s,background .18s;position:relative;overflow:hidden}
+.card:hover{border-color:var(--ac);background:var(--s2)}
+.card.sel{border-color:var(--ac);background:var(--acl)}
+.card.rec{border-color:#F5A623}
+.card-accent{height:3px;position:absolute;top:0;left:0;right:0}
+.card-title{font-size:14px;font-weight:500;margin-top:4px}
+.card-sub{font-size:12px;color:var(--tx2);margin-top:3px;line-height:1.4}
+.card-tag{font-size:11px;color:var(--tx3);margin-top:6px}
+.rec-badge{display:inline-block;background:#F5A623;color:#3D2600;font-size:10px;font-weight:600;padding:2px 10px;border-radius:4px;margin-bottom:8px;letter-spacing:.3px}
+.g2{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
+.g3{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px}
+.g4{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:10px}
+.g5{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:10px}
+.trow{display:flex;border:1px solid var(--bd);border-radius:var(--ra);overflow:hidden;width:fit-content;flex-wrap:wrap}
+.tb{padding:7px 15px;font-size:13px;background:none;color:var(--tx2);border:none;cursor:pointer;transition:background .15s,color .15s;white-space:nowrap}
+.tb.on{background:var(--ac);color:#fff}
+.tb:not(.on):hover{background:var(--s2);color:var(--tx)}
+.field{margin-bottom:18px}
+.lbl{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--tx2);font-weight:500;margin-bottom:8px}
+input[type=number],input[type=text],select{background:var(--s2);color:var(--tx);border:1px solid var(--bd);border-radius:var(--ra);padding:8px 12px;font-size:14px;font-family:inherit;outline:none}
+input[type=text]{width:100%}
+input[type=number]{width:90px}
+select{width:100%;cursor:pointer}
+input:focus,select:focus{border-color:var(--ac)}
+select option{background:var(--s2)}
+.sw{position:relative}
+.sw input[type=text]{width:100%;padding-left:36px}
+.si{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--tx3);font-size:15px;pointer-events:none}
+.plist{max-height:240px;overflow-y:auto;border:1px solid var(--bd);border-radius:var(--ra);margin-top:8px}
+.plist::-webkit-scrollbar{width:4px}
+.plist::-webkit-scrollbar-thumb{background:var(--bd);border-radius:4px}
+.pi{display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;transition:background .12s;border-bottom:1px solid var(--bd)}
+.pi:last-child{border-bottom:none}
+.pi:hover{background:var(--s2)}
+.pi-cat{font-size:10px;color:var(--tx3);text-transform:uppercase;letter-spacing:.4px}
+.pi-name{font-size:13px;font-weight:500;line-height:1.3}
+.pi-right{margin-left:auto;text-align:right;flex-shrink:0}
+.pi-price{font-size:13px;font-weight:500}
+.pi-disc{font-size:11px;color:var(--gr)}
+.irow{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--s);border:1px solid var(--bd);border-radius:var(--ra);margin-bottom:8px;flex-wrap:wrap}
+.irow-name{flex:1;font-size:13px;font-weight:500;min-width:130px}
+.irow-tag{font-size:11px;padding:2px 8px;border-radius:20px;background:var(--acl);color:var(--ac);white-space:nowrap}
+.irow-save{font-size:12px;color:var(--gr);font-weight:500;white-space:nowrap}
+.rm{background:none;border:none;color:var(--tx3);cursor:pointer;font-size:20px;padding:0 4px;line-height:1;transition:color .12s}
+.rm:hover{color:#E24B4A}
+.callout{border-radius:var(--ra);padding:12px 16px;font-size:13px;line-height:1.5;margin-top:12px;display:flex;gap:12px;align-items:flex-start}
+.c-save{background:var(--grl);border:1px solid var(--gr)}
+.c-up{background:var(--acl);border:1px solid var(--ac)}
+.c-info{background:var(--s2);border:1px solid var(--bd)}
+.c-credit{background:rgba(245,166,35,.1);border:1px solid #F5A623}
+.c-ico{flex-shrink:0;font-size:16px;margin-top:1px}
+.c-title{font-weight:500;margin-bottom:2px}
+.c-link{font-size:12px;color:var(--ac);cursor:pointer;text-decoration:underline;margin-top:4px;display:inline-block}
+.sum-hero{background:var(--s);border:1px solid var(--bd);border-radius:var(--ra2);padding:26px;text-align:center;margin-bottom:20px}
+.sum-big{font-size:44px;font-weight:600;color:var(--gr);line-height:1;margin-top:4px}
+.sum-lbl{font-size:13px;color:var(--tx2)}
+.sum-row2{display:flex;justify-content:center;gap:32px;margin-top:18px;flex-wrap:wrap}
+.sum-stat .sv{font-size:20px;font-weight:500}
+.sum-stat .sl{font-size:11px;color:var(--tx3);text-transform:uppercase;letter-spacing:.4px;margin-top:2px}
+.svc-block{background:var(--s);border:1px solid var(--bd);border-radius:var(--ra2);margin-bottom:10px;overflow:hidden}
+.svc-hdr{padding:12px 18px;background:var(--s2);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+.svc-hdr-name{font-weight:500;font-size:14px}
+.svc-hdr-save{font-size:13px;color:var(--gr);font-weight:500}
+.sr-rows{padding:0 18px}
+.sr{display:flex;justify-content:space-between;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--bd);gap:12px;flex-wrap:wrap}
+.sr:last-child{border-bottom:none}
+.sr-name{font-size:13px;flex:1;min-width:140px}
+.sr-right{text-align:right;flex-shrink:0}
+.sr-mkt{font-size:11px;color:var(--tx3);text-decoration:line-through}
+.sr-our{font-size:13px;font-weight:500}
+.sr-save{font-size:11px;color:var(--gr)}
+.total-bar{background:var(--s);border:1px solid var(--bd);border-radius:var(--ra2);padding:16px 20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-top:12px}
+.total-bar-name{font-size:15px;font-weight:500}
+.total-bar-right{text-align:right}
+.total-bar-mo{font-size:13px;color:var(--tx2)}
+.total-bar-yr{font-size:22px;font-weight:600;color:var(--gr)}
+.sep{height:1px;background:var(--bd);margin:16px 0}
+.note{font-size:12px;color:var(--tx2);padding:10px 14px;background:var(--s2);border-radius:var(--ra);border-left:3px solid var(--bd);line-height:1.5;margin-top:10px}
+.qty-row{display:flex;align-items:center;gap:10px}
+.ql{font-size:13px;color:var(--tx2)}
+.empty{font-size:13px;color:var(--tx3);padding:20px;text-align:center}
+.scope-opts{display:flex;gap:14px;flex-wrap:wrap;margin-top:12px}
+.scope-opt{display:flex;align-items:center;gap:8px;padding:10px 16px;background:var(--s);border:1.5px solid var(--bd);border-radius:var(--ra);cursor:pointer;transition:border-color .15s;font-size:14px}
+.scope-opt.on{border-color:var(--ac);background:var(--acl)}
+.scope-opt input{accent-color:var(--ac);width:15px;height:15px}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 20px;background:var(--ac);color:#fff;border:none;border-radius:var(--ra);font-size:13px;font-weight:500;cursor:pointer;transition:opacity .15s}
+.btn:hover{opacity:.85}
+.btn-sec{background:var(--s2);color:var(--tx);border:1px solid var(--bd)}
+.btn-sec:hover{opacity:1;background:var(--s3)}
+/* Credit cards */
+.cc-block{background:var(--s2);border:1px solid var(--bd);border-radius:var(--ra2);padding:20px;margin-bottom:14px}
+.cc-block-title{font-size:15px;font-weight:500;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.cc-qs{display:flex;flex-direction:column;gap:12px}
+.cc-q{font-size:13px;color:var(--tx2);margin-bottom:6px}
+.cc-opts{display:flex;gap:8px;flex-wrap:wrap}
+.cc-opt{padding:6px 14px;background:var(--s3);border:1px solid var(--bd);border-radius:var(--ra);font-size:13px;cursor:pointer;transition:all .15s}
+.cc-opt.on{background:var(--ac);border-color:var(--ac);color:#fff}
+.cc-opt:not(.on):hover{border-color:var(--ac)}
+.cc-chk{display:flex;align-items:center;gap:10px;padding:9px 14px;background:var(--s3);border:1px solid var(--bd);border-radius:var(--ra);cursor:pointer;font-size:13px;transition:all .15s}
+.cc-chk.on{border-color:var(--ac);background:var(--acl)}
+.cc-chk input{accent-color:var(--ac);width:15px;height:15px;cursor:pointer}
+.credit-result{background:var(--s);border:2px solid var(--gr);border-radius:var(--ra2);padding:14px 18px;margin-top:14px}
+.credit-result.na{border-color:var(--bd);opacity:.6}
+.credit-amount{font-size:22px;font-weight:600;color:var(--gr)}
+.credit-tier{font-size:12px;color:var(--tx2);margin-top:2px}
+.credit-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-top:16px}
+/* Brand colors */
+.bg-gw{background:#4285F4}.bg-ms{background:#00A4EF}.bg-adobe{background:#FF3B30}.bg-pw{background:#10B981}.bg-cc{background:#F5A623}
+.bg-bw{background:#175DDC}.bg-lp{background:#CC2029}.bg-1p{background:#1A8CFF}.bg-sb{background:#3B7BF6}
+.bg-gcp{background:#4285F4}.bg-aws{background:#FF9900}.bg-az{background:#0078D4}.bg-cf{background:#F6821F}
+@media print{.no-print{display:none!important}body{background:#fff;color:#111}#app{padding:20px}.sum-big,.svc-hdr-save,.sr-save,.total-bar-yr,.credit-amount{color:#155724!important}}
+</style>
+</head>
+<body>
+<div id="app" x-data="calcApp()" x-cloak>
+
+<div class="hdr">
+  <div class="hdr-inner">
+    <div class="logo-text">Software Pricing Calculator</div>
+    <div class="total-pill" x-show="totalMo > 0 || totalAn > 0">
+      Saving <strong x-text="'€' + Math.round(totalMo).toLocaleString()"></strong>/mo · <strong x-text="'€' + Math.round(totalAn).toLocaleString()"></strong>/yr
+    </div>
+  </div>
+</div>
+
+<!-- REGION -->
+<div class="sect">
+  <div class="sect-label">Step 1</div>
+  <div class="sect-title">Client region</div>
+  <div class="sect-sub">Determines available services and currencies.</div>
+  <div class="g3">
+    <div class="card" :class="{sel:region==='europe'}" @click="setRegion('europe')">
+      <div class="card-accent bg-gw"></div>
+      <div class="card-title">Europe</div>
+      <div class="card-sub">Microsoft EUR · Google Workspace EUR · Adobe EUR</div>
+    </div>
+    <div class="card" :class="{sel:region==='ukraine'}" @click="setRegion('ukraine')">
+      <div class="card-accent" style="background:#FFD700"></div>
+      <div class="card-title">Ukraine</div>
+      <div class="card-sub">Microsoft USD · Google Workspace EUR / USD</div>
+    </div>
+    <div class="card" :class="{sel:region==='row'}" @click="setRegion('row')">
+      <div class="card-accent bg-gw"></div>
+      <div class="card-title">Rest of world</div>
+      <div class="card-sub">Google Workspace USD · Password Manager</div>
+    </div>
+  </div>
+  <div x-show="region" style="margin-top:20px">
+    <div class="lbl">Apply this region to:</div>
+    <div class="scope-opts">
+      <label class="scope-opt" :class="{on:regionScope==='all'}"><input type="radio" x-model="regionScope" value="all"> All services</label>
+      <label class="scope-opt" :class="{on:regionScope==='per'}"><input type="radio" x-model="regionScope" value="per"> Each service separately</label>
+    </div>
+  </div>
+</div>
+
+<!-- SERVICES -->
+<div class="sect" x-show="region">
+  <div class="sect-label">Step 2</div>
+  <div class="sect-title">Select services</div>
+  <div class="sect-sub">Choose one or more — each expands below.</div>
+  <div class="g5">
+    <div class="card" :class="{sel:svc.pw}" @click="svc.pw=!svc.pw">
+      <div class="card-accent bg-pw"></div>
+      <div class="card-title">Password Manager</div>
+      <div class="card-sub">Bitwarden, LastPass, 1Password, Spendbase</div>
+      <div class="card-tag">All regions</div>
+    </div>
+    <div class="card" :class="{sel:svc.gw}" @click="svc.gw=!svc.gw">
+      <div class="card-accent bg-gw"></div>
+      <div class="card-title">Google Workspace</div>
+      <div class="card-sub">Business, Enterprise & Frontline</div>
+      <div class="card-tag">EUR · USD</div>
+    </div>
+    <div class="card" :class="{sel:svc.ms}" @click="svc.ms=!svc.ms">
+      <div class="card-accent bg-ms"></div>
+      <div class="card-title">Microsoft</div>
+      <div class="card-sub">M365, Office, Teams, Windows 365, Dynamics</div>
+      <div class="card-tag" x-text="region==='ukraine'?'USD · EUR':'EUR'"></div>
+    </div>
+    <div class="card" :class="{sel:svc.adobe}" @click="svc.adobe=!svc.adobe" x-show="region==='europe'||regionScope==='per'">
+      <div class="card-accent bg-adobe"></div>
+      <div class="card-title">Adobe</div>
+      <div class="card-sub">Creative Cloud, Acrobat, Sign, AI, API</div>
+      <div class="card-tag">EUR · Europe entity</div>
+    </div>
+    <div class="card" :class="{sel:svc.cc}" @click="svc.cc=!svc.cc">
+      <div class="card-accent bg-cc"></div>
+      <div class="card-title">Cloud Credits</div>
+      <div class="card-sub">GCP, AWS, Azure, Cloudflare startup programs</div>
+      <div class="card-tag">Eligibility assessment</div>
+    </div>
+  </div>
+</div>
+
+<!-- PASSWORD MANAGER -->
+<div class="sect" x-show="svc.pw">
+  <div class="sect-label">Password Manager</div>
+  <div class="sect-title" style="margin-bottom:20px">Configure password management</div>
+  <div class="field">
+    <div class="lbl">Select product</div>
+    <div class="g2">
+      <template x-for="p in D.pw" :key="p.id">
+        <div class="card" :class="{sel:pw.productId===p.id,rec:p.rec}" @click="pw.productId=p.id">
+          <div class="card-accent" :class="'bg-'+p.bid"></div>
+          <div x-show="p.rec" class="rec-badge">★ Recommended</div>
+          <div class="card-title" x-text="p.n"></div>
+          <div class="card-sub" x-text="p.desc"></div>
+          <div class="card-tag" x-text="(p.cur==='EUR'?'€':'$')+p.op.toFixed(2)+'/user/mo'"></div>
+        </div>
+      </template>
+    </div>
+  </div>
+  <div class="field" x-show="pw.productId">
+    <div class="lbl">Number of licences</div>
+    <div class="qty-row">
+      <input type="number" x-model.number="pw.qty" min="1" @change="triggerUpdate()" style="width:90px">
+      <span class="ql">users</span>
+    </div>
+  </div>
+  <div class="callout c-save" x-show="pw.productId && pwSaveMo > 0">
+    <div class="c-ico">💰</div>
+    <div>
+      <div class="c-title">Saving <span x-text="'€'+pwSaveMo.toFixed(2)"></span>/mo · <span x-text="'€'+(pwSaveMo*12).toFixed(2)"></span>/yr</div>
+      <div style="font-size:12px;color:var(--tx2);margin-top:2px">
+        <span x-text="D.pw.find(p=>p.id===pw.productId)?.n"></span> at
+        <span x-text="(D.pw.find(p=>p.id===pw.productId)?.cur==='EUR'?'€':'$')+D.pw.find(p=>p.id===pw.productId)?.mp.toFixed(2)"></span>/user/mo
+        vs Spendbase at €3.00/user/mo — saving €1.50/user/mo vs LastPass (the cheapest market alternative at €4.50/user/mo).
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- GOOGLE WORKSPACE -->
+<div class="sect" x-show="svc.gw">
+  <div class="sect-label">Google Workspace</div>
+  <div class="sect-title" style="margin-bottom:6px">Configure Google Workspace licences</div>
+  <div class="sect-sub">Add multiple licence types — e.g. Business Standard for 20 users + Frontline Starter for 50 users.</div>
+  <div class="field" x-show="regionScope==='per'">
+    <div class="lbl">Region for this service</div>
+    <div class="trow">
+      <button class="tb" :class="{on:gwRegion==='europe'}" @click="gwRegion='europe';gwCur='eur'">Europe (EUR)</button>
+      <button class="tb" :class="{on:gwRegion==='ukraine'}" @click="gwRegion='ukraine'">Ukraine</button>
+      <button class="tb" :class="{on:gwRegion==='row'}" @click="gwRegion='row';gwCur='usd'">Rest of world (USD)</button>
+    </div>
+  </div>
+  <div class="field" x-show="effRegion('gw')==='ukraine'||effRegion('gw')==='row'">
+    <div class="lbl">Currency for this plan</div>
+    <div class="trow">
+      <button class="tb" :class="{on:gwCur==='eur'}" @click="gwCur='eur'">EUR €</button>
+      <button class="tb" :class="{on:gwCur==='usd'}" @click="gwCur='usd'">USD $</button>
+    </div>
+  </div>
+  <div class="field">
+    <div class="lbl">Billing type</div>
+    <div class="trow">
+      <button class="tb" :class="{on:gwBilling==='commit'}" @click="gwBilling='commit'">Annual commitment</button>
+      <button class="tb" :class="{on:gwBilling==='flex'}" @click="gwBilling='flex'">Flex (month-to-month)</button>
+    </div>
+  </div>
+  <div class="field">
+    <div class="lbl">Plan</div>
+    <select x-model="gwPlanId" style="max-width:480px">
+      <option value="">— select a plan —</option>
+      <template x-for="p in gwPlans" :key="p.id">
+        <option :value="p.id" x-text="p.n+' — '+(gwCur==='eur'?'€':'$')+(gwBilling==='commit'?p.oc:p.of).toFixed(2)+'/user/mo ('+(Math.round(((gwBilling==='commit'?p.cm:p.fl)-(gwBilling==='commit'?p.oc:p.of))/(gwBilling==='commit'?p.cm:p.fl)*100))+'% off)'"></option>
+      </template>
+    </select>
+  </div>
+  <div class="field">
+    <div class="lbl">Number of licences</div>
+    <div class="qty-row">
+      <input type="number" x-model.number="gwQty" min="1" style="width:90px">
+      <span class="ql">users</span>
+      <button class="btn btn-sm" @click="addGwItem()" :disabled="!gwPlanId">+ Add plan</button>
+    </div>
+  </div>
+  <div class="callout c-up" x-show="gwUpgrade" style="margin-bottom:12px">
+    <div class="c-ico">⚡</div>
+    <div>
+      <div class="c-title">Upgrade opportunity for selected plan</div>
+      <div style="font-size:12px;margin-top:2px">Upgrading <span x-text="gwUpgrade?.from"></span> → <span x-text="gwUpgrade?.to"></span> gives <strong>−20% off</strong> vs −12% for new. Extra saving: €<span x-text="gwUpgrade?.extra?.toFixed(2)"></span>/user/mo.</div>
+      <span class="c-link" @click="applyUpgrade()">Apply upgrade pricing →</span>
+    </div>
+  </div>
+  <div x-show="gwItems.length > 0">
+    <div class="lbl">Added plans</div>
+    <template x-for="(item,i) in gwItems" :key="i">
+      <div class="irow">
+        <div class="irow-name" x-text="gwItemName(item)"></div>
+        <span class="irow-tag" x-text="(item.cur==='eur'?'EUR':'USD')+' · '+(item.billing==='commit'?'Annual':'Flex')"></span>
+        <div class="irow-save" x-text="'–'+(item.cur==='eur'?'€':'$')+gwItemSaveMo(item).toFixed(2)+'/mo'"></div>
+        <div class="qty-row">
+          <input type="number" :value="item.qty" @input="updateGwQty(i,$event.target.value)" min="1" style="width:70px">
+          <span class="ql">users</span>
+        </div>
+        <button class="rm" @click="removeGwItem(i)">×</button>
+      </div>
+    </template>
+    <div class="callout c-save" style="margin-top:10px">
+      <div class="c-ico">💰</div>
+      <div>
+        <div class="c-title">Total GW saving: <span x-text="(gwCur==='eur'?'€':'$')+gwTotalSaveMo.toFixed(2)"></span>/mo · <span x-text="(gwCur==='eur'?'€':'$')+(gwTotalSaveMo*12).toFixed(2)"></span>/yr</div>
+        <div style="font-size:12px;color:var(--tx2);margin-top:2px">Across <span x-text="gwItems.length"></span> licence type(s) · switch currency or billing above to add different entities</div>
+      </div>
+    </div>
+  </div>
+  <div class="note" x-show="gwItems.length===0">Select a plan and click <strong>+ Add plan</strong>. You can mix plans — e.g. Business Standard × 20 + Frontline Starter × 50. Switch EUR/USD above to add licences from a different entity.</div>
+</div>
+
+<!-- MICROSOFT -->
+<div class="sect" x-show="svc.ms">
+  <div class="sect-label">Microsoft</div>
+  <div class="sect-title" style="margin-bottom:20px">Configure Microsoft licences</div>
+  <div class="field" x-show="regionScope==='per'">
+    <div class="lbl">Region for this service</div>
+    <div class="trow">
+      <button class="tb" :class="{on:msRegion==='europe'}" @click="msRegion='europe';msEntity='eur'">Europe (EUR)</button>
+      <button class="tb" :class="{on:msRegion==='ukraine'}" @click="msRegion='ukraine'">Ukraine (USD)</button>
+    </div>
+  </div>
+  <div class="field" x-show="effRegion('ms')==='ukraine'||region==='ukraine'">
+    <div class="lbl">Entity</div>
+    <div class="trow">
+      <button class="tb" :class="{on:msEntity==='eur'}" @click="msEntity='eur'">Europe entity (EUR)</button>
+      <button class="tb" :class="{on:msEntity==='usd'}" @click="msEntity='usd'">Ukraine entity (USD)</button>
+    </div>
+    <div class="note" style="margin-top:8px">Switch entity above to add plans from both. Each added plan stores its own entity — you can freely mix EUR and USD plans.</div>
+  </div>
+  <div class="field">
+    <div class="lbl">Billing cycle</div>
+    <div class="trow" style="flex-wrap:wrap">
+      <button class="tb" :class="{on:msCycle==='P1MM'}" @click="msCycle='P1MM'">Monthly / Monthly</button>
+      <button class="tb" :class="{on:msCycle==='P1YM'}" @click="msCycle='P1YM'" x-show="msEntity==='eur'">Annual commit · monthly billing</button>
+      <button class="tb" :class="{on:msCycle==='P1YA'}" @click="msCycle='P1YA'">Annual commit · annual billing</button>
+      <button class="tb" :class="{on:msCycle==='P3YA'}" @click="msCycle='P3YA'" x-show="msEntity==='eur'">3-year commit · annual billing</button>
+    </div>
+  </div>
+  <div class="field">
+    <div class="lbl">Search & add plans</div>
+    <div class="sw"><span class="si">⌕</span><input type="text" x-model="msSearch" placeholder="Search by name or category…"></div>
+    <div class="plist">
+      <template x-if="filteredMs.length===0"><div class="empty">No plans found for this billing cycle</div></template>
+      <template x-for="p in filteredMs" :key="p.id">
+        <div class="pi" @click="addMs(p.id)">
+          <div style="flex:1"><div class="pi-cat" x-text="p.c"></div><div class="pi-name" x-text="p.n"></div></div>
+          <div class="pi-right">
+            <div class="pi-price" x-text="getMsPrice(p)"></div>
+            <div class="pi-disc" x-text="getMsDisc(p)+'% off'"></div>
+          </div>
+        </div>
+      </template>
+    </div>
+  </div>
+  <div x-show="msItems.length>0">
+    <div class="lbl">Added plans</div>
+    <template x-for="(item,i) in msItems" :key="i">
+      <div class="irow">
+        <div class="irow-name" x-text="getMsName(item)"></div>
+        <span class="irow-tag" x-text="item.cycle+' · '+item.entity.toUpperCase()"></span>
+        <div class="irow-save" x-text="'–'+(item.entity==='eur'?'€':'$')+getMsItemSave(item)"></div>
+        <div class="qty-row"><input type="number" :value="item.qty" @input="updateMsQty(i,$event.target.value)" min="1" style="width:70px"><span class="ql">users</span></div>
+        <button class="rm" @click="msItems.splice(i,1);triggerUpdate()">×</button>
+      </div>
+    </template>
+  </div>
+  <div class="note" x-show="msItems.length===0">Click any plan to add it. You can add multiple plans.</div>
+</div>
+
+<!-- ADOBE -->
+<div class="sect" x-show="svc.adobe">
+  <div class="sect-label">Adobe — Europe entity · EUR</div>
+  <div class="sect-title" style="margin-bottom:20px">Configure Adobe licences</div>
+  <div class="field">
+    <div class="lbl">Search & add products</div>
+    <div class="sw"><span class="si">⌕</span><input type="text" x-model="adobeSearch" placeholder="Search Adobe products…"></div>
+    <div class="plist">
+      <template x-if="filteredAdobe.length===0"><div class="empty">No products found</div></template>
+      <template x-for="p in filteredAdobe" :key="p.id">
+        <div class="pi" @click="addAdobe(p.id)">
+          <div style="flex:1"><div class="pi-cat" x-text="p.c"></div><div class="pi-name" x-text="p.n"></div></div>
+          <div class="pi-right">
+            <div class="pi-price" x-text="'€'+p.our.toFixed(2)+'/yr'"></div>
+            <div class="pi-disc" x-text="Math.round(((p.rrp-p.our)/p.rrp)*100)+'% off'"></div>
+          </div>
+        </div>
+      </template>
+    </div>
+  </div>
+  <div x-show="adobeItems.length>0">
+    <div class="lbl">Added products</div>
+    <template x-for="(item,i) in adobeItems" :key="i">
+      <div class="irow" x-data="{get pr(){return D.adobe.find(p=>p.id===item.skuId)}}">
+        <div class="irow-name" x-text="pr?.n"></div>
+        <span class="irow-tag">EUR · Annual</span>
+        <div class="irow-save" x-text="'–€'+((((pr?.rrp||0)-(pr?.our||0))*item.qty)/12).toFixed(2)+'/mo'"></div>
+        <div class="qty-row"><input type="number" :value="item.qty" @input="updateAdobeQty(i,$event.target.value)" min="1" style="width:70px"><span class="ql" x-text="pr?.unit||'users'"></span></div>
+        <button class="rm" @click="adobeItems.splice(i,1);triggerUpdate()">×</button>
+      </div>
+    </template>
+  </div>
+  <div class="note" x-show="adobeItems.length===0">All prices per unit/year. Click to add products.</div>
+</div>
+
+<!-- CLOUD CREDITS -->
+<div class="sect" x-show="svc.cc">
+  <div class="sect-label">Cloud Credits</div>
+  <div class="sect-title" style="margin-bottom:6px">Cloud provider startup credit eligibility</div>
+  <div class="sect-sub">Answer questions for each provider to assess your eligibility.</div>
+
+  <!-- GCP -->
+  <div class="cc-block">
+    <div class="cc-block-title"><span style="color:#4285F4">●</span> Google Cloud Platform (GCP)</div>
+    <div class="cc-qs">
+      <div class="field">
+        <div class="cc-q">Is your product a SaaS product?</div>
+        <div class="cc-opts">
+          <div class="cc-opt" :class="{on:cc.gcp.isSaaS==='yes'}" @click="cc.gcp.isSaaS='yes'">Yes</div>
+          <div class="cc-opt" :class="{on:cc.gcp.isSaaS==='no'}" @click="cc.gcp.isSaaS='no'">No</div>
+        </div>
+      </div>
+      <div class="field" x-show="cc.gcp.isSaaS">
+        <div class="cc-q">Do you have institutional VC funding?</div>
+        <div class="cc-opts">
+          <div class="cc-opt" :class="{on:cc.gcp.hasFunding==='yes'}" @click="cc.gcp.hasFunding='yes'">Yes</div>
+          <div class="cc-opt" :class="{on:cc.gcp.hasFunding==='no'}" @click="cc.gcp.hasFunding='no'">No</div>
+        </div>
+      </div>
+      <div class="field" x-show="cc.gcp.hasFunding==='yes'">
+        <div class="cc-q">Have you already used your Scale Tier ($100K) credits?</div>
+        <div class="cc-opts">
+          <div class="cc-opt" :class="{on:cc.gcp.usedScale==='yes'}" @click="cc.gcp.usedScale='yes'">Yes — looking for Year 2</div>
+          <div class="cc-opt" :class="{on:cc.gcp.usedScale==='no'}" @click="cc.gcp.usedScale='no'">No — first time</div>
+        </div>
+      </div>
+    </div>
+    <div class="credit-result" :class="{na:!gcpResult}" x-show="gcpResult">
+      <div class="credit-amount" x-text="gcpResult?'$'+gcpResult.amount.toLocaleString():''"></div>
+      <div class="credit-tier" x-text="gcpResult?.tier"></div>
+      <div style="font-size:12px;color:var(--tx2);margin-top:6px" x-text="gcpResult?.desc"></div>
+    </div>
+    <div class="note" x-show="cc.gcp.isSaaS==='no'">GCP startup credits are generally aimed at SaaS products.</div>
+  </div>
+
+  <!-- AWS -->
+
+  <!-- AZURE -->
+  <div class="cc-block">
+    <div class="cc-block-title"><span style="color:#0078D4">●</span> Microsoft Azure</div>
+    <div class="cc-qs">
+      <div class="field">
+        <div class="cc-q">Which of the following apply to your company? <span style="color:var(--tx3)">(need 4+ for eligibility)</span></div>
+        <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">
+          <label class="cc-chk" :class="{on:cc.az.criteria.under}"><input type="checkbox" x-model="cc.az.criteria.under"> Led by an underrepresented founder</label>
+          <label class="cc-chk" :class="{on:cc.az.criteria.second}"><input type="checkbox" x-model="cc.az.criteria.second"> Second-time founder or strategic exit</label>
+          <label class="cc-chk" :class="{on:cc.az.criteria.tech}"><input type="checkbox" x-model="cc.az.criteria.tech"> Technical co-founder or CTO in place</label>
+          <label class="cc-chk" :class="{on:cc.az.criteria.b2b}"><input type="checkbox" x-model="cc.az.criteria.b2b"> B2B SaaS model</label>
+          <label class="cc-chk" :class="{on:cc.az.criteria.ai}"><input type="checkbox" x-model="cc.az.criteria.ai"> Core product leverages AI/ML technologies</label>
+          <label class="cc-chk" :class="{on:cc.az.criteria.mvp}"><input type="checkbox" x-model="cc.az.criteria.mvp"> At MVP stage or beyond</label>
+          <label class="cc-chk" :class="{on:cc.az.criteria.backed}"><input type="checkbox" x-model="cc.az.criteria.backed"> Backed by VC, accelerator, incubator, or angel investor</label>
+        </div>
+        <div style="font-size:13px;color:var(--tx2);margin-top:10px">
+          Criteria met: <strong x-text="azCriteriaCount"></strong> / 7
+        </div>
+      </div>
+      <div class="field" x-show="azCriteriaCount>=4">
+        <div class="cc-q">Current monthly Azure spend (USD) — determines tier</div>
+        <div class="qty-row"><span style="color:var(--tx2);font-size:14px">$</span><input type="number" x-model.number="cc.az.monthlySpend" min="0" placeholder="0" style="width:130px"></div>
+      </div>
+    </div>
+    <div class="credit-result" :class="{na:azResult?.amount===0}" x-show="azResult">
+      <div class="credit-amount" x-text="azResult?.amount>0?'Up to $'+azResult.amount.toLocaleString():'Not yet eligible'"></div>
+      <div style="font-size:12px;color:var(--tx2);margin-top:6px" x-text="azResult?.desc"></div>
+    </div>
+  </div>
+
+  <!-- CLOUDFLARE -->
+  <div class="cc-block">
+    <div class="cc-block-title"><span style="color:#F6821F">●</span> Cloudflare</div>
+    <div class="cc-qs">
+      <div class="field">
+        <div class="cc-q">Are you building a software-based product or service?</div>
+        <div class="cc-opts">
+          <div class="cc-opt" :class="{on:cc.cf.software===true}" @click="cc.cf.software=true">Yes</div>
+          <div class="cc-opt" :class="{on:cc.cf.software===false&&cc.cf.software!==null}" @click="cc.cf.software=false">No</div>
+        </div>
+      </div>
+      <div class="field" x-show="cc.cf.software">
+        <div class="cc-q">Was the company founded in the last 5 years?</div>
+        <div class="cc-opts">
+          <div class="cc-opt" :class="{on:cc.cf.last5===true}" @click="cc.cf.last5=true">Yes</div>
+          <div class="cc-opt" :class="{on:cc.cf.last5===false&&cc.cf.last5!==null}" @click="cc.cf.last5=false">No</div>
+        </div>
+      </div>
+      <div class="field" x-show="cc.cf.software&&cc.cf.last5">
+        <div class="cc-q">For $1M tier — do these also apply?</div>
+        <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">
+          <label class="cc-chk" :class="{on:cc.cf.linkedin}"><input type="checkbox" x-model="cc.cf.linkedin"> Active LinkedIn presence</label>
+          <label class="cc-chk" :class="{on:cc.cf.funded}"><input type="checkbox" x-model="cc.cf.funded"> Funded up to $1M</label>
+        </div>
+      </div>
+    </div>
+    <div class="credit-result" x-show="cfResult">
+      <div class="credit-amount" x-text="cfResult?'$'+cfResult.amount.toLocaleString():''"></div>
+      <div class="credit-tier" x-text="cfResult?.tier"></div>
+      <div style="font-size:12px;color:var(--tx2);margin-top:6px" x-text="cfResult?.desc"></div>
+    </div>
+  </div>
+</div>
+
+<!-- SUMMARY -->
+<div class="sect" x-show="totalMo>0||totalAn>0||hasCredits">
+  <div class="sect-label">Summary</div>
+  <div class="sect-title" style="margin-bottom:20px">Savings breakdown</div>
+  <div class="sum-hero" x-show="totalAn>0">
+    <div class="sum-lbl">Total annual subscription savings</div>
+    <div class="sum-big" x-text="'€'+Math.round(totalAn).toLocaleString()"></div>
+    <div class="sum-row2">
+      <div class="sum-stat"><div class="sv" x-text="'€'+Math.round(totalMo).toLocaleString()"></div><div class="sl">per month</div></div>
+      <div class="sum-stat"><div class="sv" x-text="'€'+Math.round(totalAn).toLocaleString()"></div><div class="sl">per year</div></div>
+    </div>
+  </div>
+
+  <!-- PW summary -->
+  <div class="svc-block" x-show="svc.pw&&pw.productId&&pwSaveMo>0">
+    <div class="svc-hdr">
+      <span class="svc-hdr-name">Password Manager</span>
+      <span class="svc-hdr-save" x-text="'€'+pwSaveMo.toFixed(2)+'/mo · €'+(pwSaveMo*12).toFixed(2)+'/yr'"></span>
+    </div>
+    <div class="sr-rows">
+      <div class="sr">
+        <div class="sr-name" x-text="D.pw.find(p=>p.id===pw.productId)?.n+' × '+pw.qty+' users vs Spendbase €3.00/user/mo'"></div>
+        <div class="sr-right">
+          <div class="sr-mkt" x-text="'Market: '+(D.pw.find(p=>p.id===pw.productId)?.cur==='EUR'?'€':'$')+((D.pw.find(p=>p.id===pw.productId)?.mp||0)*pw.qty).toFixed(2)+'/mo'"></div>
+          <div class="sr-our" x-text="'Spendbase: €'+(3.00*pw.qty).toFixed(2)+'/mo (€1.50 cheaper/user than market)'"></div>
+          <div class="sr-save" x-text="'Save €'+(pwSaveMo*12).toFixed(2)+'/yr'"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GW summary -->
+  <div class="svc-block" x-show="svc.gw&&gwItems.length>0&&gwTotalSaveMo>0">
+    <div class="svc-hdr">
+      <span class="svc-hdr-name">Google Workspace</span>
+      <span class="svc-hdr-save" x-text="(gwCur==='eur'?'€':'$')+gwTotalSaveMo.toFixed(2)+'/mo · '+(gwCur==='eur'?'€':'$')+(gwTotalSaveMo*12).toFixed(2)+'/yr'"></span>
+    </div>
+    <div class="sr-rows">
+      <template x-for="(item,i) in gwItems" :key="i">
+        <div class="sr" x-data="{get p(){const pl=item.cur==='eur'?D.gw.eur.std:D.gw.usd.std;return pl.find(x=>x.id===item.planId);},get sym(){return item.cur==='eur'?'€':'$';},get mkt(){if(!this.p)return 0;return(item.billing==='commit'?this.p.cm:this.p.fl)*item.qty;},get our(){if(!this.p)return 0;return(item.billing==='commit'?this.p.oc:this.p.of)*item.qty;}}">
+          <div class="sr-name" x-text="p?.n+' × '+item.qty+' ('+item.cur.toUpperCase()+' · '+(item.billing==='commit'?'Annual commit':'Flex')+')'"></div>
+          <div class="sr-right">
+            <div class="sr-mkt" x-text="'Market: '+sym+mkt.toFixed(2)+'/mo'"></div>
+            <div class="sr-our" x-text="'Our: '+sym+our.toFixed(2)+'/mo'"></div>
+            <div class="sr-save" x-text="'Save '+sym+((mkt-our)*12).toFixed(2)+'/yr'"></div>
+          </div>
+        </div>
+      </template>
+    </div>
+  </div>
+
+  <!-- MS summary -->
+  <div class="svc-block" x-show="svc.ms&&msItems.length>0">
+    <div class="svc-hdr">
+      <span class="svc-hdr-name">Microsoft</span>
+      <span class="svc-hdr-save" x-text="'€'+msSaveMo.toFixed(2)+'/mo · €'+(msSaveMo*12).toFixed(2)+'/yr'"></span>
+    </div>
+    <div class="sr-rows">
+      <template x-for="(item,i) in msItems" :key="i">
+        <div class="sr" x-data="{get c(){const s=item.entity==='eur'?D.ms.eur:D.ms.usd;const sk=s.find(x=>x.id===item.skuId);if(!sk)return null;const p=sk[item.cycle];if(!p)return null;const an=item.cycle==='P1YA'||item.cycle==='P3YA';const d=(p.m-p.o)*item.qty;return{name:sk.n,sym:item.entity==='eur'?'€':'$',mkt:an?p.m*item.qty:p.m*item.qty,our:p.o*item.qty,saveMo:an?d/12:d,saveAn:an?d:d*12,disc:Math.round(((p.m-p.o)/p.m)*100),isAnn:an}}}">
+          <div class="sr-name" x-text="c?.name+' × '+item.qty+' ('+item.cycle+' · '+item.entity.toUpperCase()+')'"></div>
+          <div class="sr-right" x-show="c">
+            <div class="sr-mkt" x-text="'Market: '+c?.sym+c?.mkt?.toFixed(2)+(c?.isAnn?'/yr':'/mo')"></div>
+            <div class="sr-our" x-text="'Our: '+c?.sym+c?.our?.toFixed(2)+(c?.isAnn?'/yr':'/mo')"></div>
+            <div class="sr-save" x-text="'−'+c?.disc+'% · Save '+c?.sym+c?.saveAn?.toFixed(2)+'/yr'"></div>
+          </div>
+        </div>
+      </template>
+    </div>
+  </div>
+
+  <!-- Adobe summary -->
+  <div class="svc-block" x-show="svc.adobe&&adobeItems.length>0">
+    <div class="svc-hdr">
+      <span class="svc-hdr-name">Adobe</span>
+      <span class="svc-hdr-save" x-text="'€'+adobeSaveMo.toFixed(2)+'/mo · €'+(adobeSaveMo*12).toFixed(2)+'/yr'"></span>
+    </div>
+    <div class="sr-rows">
+      <template x-for="(item,i) in adobeItems" :key="i">
+        <div class="sr" x-data="{get p(){return D.adobe.find(x=>x.id===item.skuId)}}">
+          <div class="sr-name" x-text="p?.n+' × '+item.qty"></div>
+          <div class="sr-right">
+            <div class="sr-mkt" x-text="'Market: €'+(p?.rrp*item.qty).toFixed(2)+'/yr'"></div>
+            <div class="sr-our" x-text="'Our: €'+(p?.our*item.qty).toFixed(2)+'/yr'"></div>
+            <div class="sr-save" x-text="'−'+Math.round(((p?.rrp-p?.our)/p?.rrp)*100)+'% · Save €'+((p?.rrp-p?.our)*item.qty).toFixed(2)+'/yr'"></div>
+          </div>
+        </div>
+      </template>
+    </div>
+  </div>
+
+  <!-- Cloud credits summary -->
+  <div class="svc-block" x-show="svc.cc&&hasCredits">
+    <div class="svc-hdr"><span class="svc-hdr-name">Cloud Credits</span><span class="svc-hdr-save">Potential startup credits</span></div>
+    <div class="credit-grid" style="padding:16px 18px">
+      <div class="credit-result" x-show="gcpResult">
+        <div style="font-size:11px;color:var(--tx3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px">GCP</div>
+        <div class="credit-amount" x-text="gcpResult?'$'+gcpResult.amount.toLocaleString():''"></div>
+        <div class="credit-tier" x-text="gcpResult?.tier"></div>
+      </div>
+      <div class="credit-result" :class="{na:!azResult||azResult.amount===0}" x-show="azResult">
+        <div style="font-size:11px;color:var(--tx3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px">Azure</div>
+        <div class="credit-amount" x-text="azResult?.amount>0?'$'+azResult.amount.toLocaleString():'Not eligible yet'"></div>
+        <div class="credit-tier" x-text="azResult?.desc"></div>
+      </div>
+      <div class="credit-result" x-show="cfResult">
+        <div style="font-size:11px;color:var(--tx3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px">Cloudflare</div>
+        <div class="credit-amount" x-text="cfResult?'$'+cfResult.amount.toLocaleString():''"></div>
+        <div class="credit-tier" x-text="cfResult?.tier"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="total-bar" x-show="totalAn>0">
+    <div class="total-bar-name">Combined subscription savings</div>
+    <div class="total-bar-right">
+      <div class="total-bar-mo" x-text="'€'+Math.round(totalMo).toLocaleString()+' / month'"></div>
+      <div class="total-bar-yr" x-text="'€'+Math.round(totalAn).toLocaleString()+' / year'"></div>
+    </div>
+  </div>
+  <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap" class="no-print">
+    <button class="btn" @click="window.print()">Export as PDF</button>
+    <button class="btn btn-sec" @click="resetAll()">Start over</button>
+  </div>
+</div>
+
+</div>
+<script defer src="https://unpkg.com/alpinejs@3.13.3/dist/cdn.min.js"></script>
+<script>
+const D={
+gw:{
+eur:{std:[
+{id:'bs',n:'Business Starter',fl:8.10,cm:6.80,of:7.13,oc:5.98},
+{id:'bstd',n:'Business Standard',fl:16.20,cm:13.60,of:14.26,oc:11.97},
+{id:'bp',n:'Business Plus',fl:25.30,cm:21.10,of:22.26,oc:18.57},
+{id:'ee',n:'Enterprise Essentials',fl:11.52,cm:9.60,of:10.14,oc:8.45},
+{id:'eep',n:'Enterprise Essentials Plus',fl:23.04,cm:19.20,of:20.28,oc:16.90},
+{id:'es',n:'Enterprise Starter',fl:12.70,cm:10.60,of:11.18,oc:9.33},
+{id:'estd',n:'Enterprise Standard',fl:31.30,cm:26.10,of:27.54,oc:22.97},
+{id:'ep',n:'Enterprise Plus',fl:40.50,cm:33.80,of:35.64,oc:29.74},
+{id:'fst',n:'Frontline Starter',fl:5.64,cm:4.70,of:4.96,oc:4.14},
+{id:'fstd',n:'Frontline Standard',fl:13.80,cm:11.50,of:12.14,oc:10.12},
+{id:'abs',n:'Archive – Business Starter',fl:2.28,cm:1.90,of:2.01,oc:1.67},
+{id:'abstd',n:'Archive – Business Standard',fl:3.18,cm:2.65,of:2.80,oc:2.33},
+{id:'abp',n:'Archive – Business Plus',fl:4.56,cm:3.80,of:4.01,oc:3.34},
+{id:'aestd',n:'Archive – Enterprise Standard',fl:5.76,cm:4.80,of:5.07,oc:4.22},
+{id:'aep',n:'Archive – Enterprise Plus',fl:7.92,cm:6.60,of:6.97,oc:5.81},
+],up:[
+{id:'u1',from:'Business Starter',to:'Business Standard',fl:16.20,cm:13.60,of:12.96,oc:10.88},
+{id:'u2',from:'Business Standard',to:'Business Plus',fl:25.30,cm:21.10,of:20.24,oc:16.88},
+{id:'u3',from:'Business Plus',to:'Enterprise Standard',fl:31.30,cm:26.10,of:25.04,oc:20.88},
+{id:'u4',from:'Enterprise Standard',to:'Enterprise Plus',fl:40.50,cm:33.80,of:32.40,oc:27.04},
+]},
+usd:{std:[
+{id:'bs',n:'Business Starter',fl:8.40,cm:7.00,of:7.98,oc:6.65},
+{id:'bstd',n:'Business Standard',fl:16.80,cm:14.00,of:15.96,oc:13.30},
+{id:'bp',n:'Business Plus',fl:26.40,cm:22.00,of:25.08,oc:20.90},
+{id:'ee',n:'Enterprise Essentials',fl:12.00,cm:10.00,of:11.40,oc:9.50},
+{id:'eep',n:'Enterprise Essentials Plus',fl:24.00,cm:20.00,of:22.80,oc:19.00},
+{id:'es',n:'Enterprise Starter',fl:13.20,cm:11.00,of:12.54,oc:10.45},
+{id:'estd',n:'Enterprise Standard',fl:32.40,cm:27.00,of:30.78,oc:25.65},
+{id:'ep',n:'Enterprise Plus',fl:42.00,cm:35.00,of:39.90,oc:33.25},
+{id:'fst',n:'Frontline Starter',fl:6.00,cm:5.00,of:5.70,oc:4.75},
+{id:'fstd',n:'Frontline Standard',fl:14.40,cm:12.00,of:13.68,oc:11.40},
+]}},
+ms:{eur:[
+// Microsoft 365 Business
+{id:'ms-bb-notms',c:'Microsoft 365',n:'M365 Business Basic EEA (No Teams) + Copilot',P1MM:{o:23.90,m:26.40},P1YM:{o:20.91,m:23.10},P1YA:{o:239.01,m:264.00},P3YA:{o:239.01,m:264.00}},
+{id:'ms-bb',c:'Microsoft 365',n:'M365 Business Basic + Copilot',P1MM:{o:25.28,m:28.08},P1YM:null,P1YA:{o:252.81,m:280.80},P3YA:{o:252.81,m:280.80}},
+{id:'ms-bstd-notms',c:'Microsoft 365',n:'M365 Business Standard EEA (No Teams) + Copilot',P1MM:{o:28.03,m:31.44},P1YM:{o:24.52,m:27.51},P1YA:{o:280.32,m:314.40},P3YA:{o:280.32,m:314.40}},
+{id:'ms-bstd',c:'Microsoft 365',n:'M365 Business Standard + Copilot',P1MM:{o:30.79,m:34.80},P1YM:null,P1YA:{o:307.92,m:348.00},P3YA:{o:307.92,m:348.00}},
+{id:'ms-bp-notms',c:'Microsoft 365',n:'M365 Business Premium EEA (No Teams) + Copilot',P1MM:{o:36.22,m:41.40},P1YM:{o:31.68,m:36.23},P1YA:{o:362.11,m:414.00},P3YA:{o:362.11,m:414.00}},
+{id:'ms-bp',c:'Microsoft 365',n:'M365 Business Premium + Copilot',P1MM:{o:38.96,m:44.76},P1YM:null,P1YA:{o:389.66,m:447.60},P3YA:{o:389.66,m:447.60}},
+{id:'ms-f1',c:'Microsoft 365',n:'M365 F1',P1MM:{o:1.87,m:2.28},P1YM:{o:1.64,m:2.00},P1YA:{o:18.71,m:22.80},P3YA:{o:18.71,m:22.80}},
+{id:'ms-f1-eea',c:'Microsoft 365',n:'M365 F1 EEA (No Teams)',P1MM:{o:1.48,m:1.80},P1YM:{o:1.29,m:1.58},P1YA:{o:14.77,m:18.00},P3YA:{o:14.77,m:18.00}},
+// Standalone plans
+{id:'ms-bb-std',c:'Microsoft 365 Standalone',n:'M365 Business Basic (standalone)',P1MM:{o:6.34,m:7.20},P1YM:{o:5.54,m:6.30},P1YA:{o:63.36,m:72.00},P3YA:{o:63.36,m:72.00}},
+{id:'ms-bstd-std',c:'Microsoft 365 Standalone',n:'M365 Business Standard (standalone)',P1MM:{o:13.20,m:15.00},P1YM:{o:11.55,m:13.13},P1YA:{o:132.00,m:150.00},P3YA:{o:132.00,m:150.00}},
+{id:'ms-bp-std',c:'Microsoft 365 Standalone',n:'M365 Business Premium (standalone)',P1MM:{o:23.23,m:26.40},P1YM:{o:20.32,m:23.10},P1YA:{o:232.32,m:264.00},P3YA:{o:232.32,m:264.00}},
+{id:'ms-e3',c:'Microsoft 365 Enterprise',n:'M365 E3',P1MM:{o:32.45,m:37.80},P1YM:{o:29.17,m:34.02},P1YA:{o:324.50,m:378.00},P3YA:{o:324.50,m:378.00}},
+{id:'ms-e5',c:'Microsoft 365 Enterprise',n:'M365 E5',P1MM:{o:54.88,m:62.00},P1YM:{o:49.39,m:55.80},P1YA:{o:548.80,m:620.00},P3YA:{o:548.80,m:620.00}},
+{id:'ms-e5-sec',c:'Microsoft 365 Enterprise',n:'M365 E5 Security',P1MM:{o:13.99,m:15.60},P1YM:{o:12.40,m:14.04},P1YA:{o:139.90,m:156.00},P3YA:{o:139.90,m:156.00}},
+{id:'ms-e5-comp',c:'Microsoft 365 Enterprise',n:'M365 E5 Compliance',P1MM:{o:13.99,m:15.60},P1YM:{o:12.40,m:14.04},P1YA:{o:139.90,m:156.00},P3YA:{o:139.90,m:156.00}},
+{id:'ms-e7',c:'Microsoft 365 Enterprise',n:'M365 E7',P1MM:{o:90.48,m:110.28},P1YM:{o:79.18,m:96.50},P1YA:{o:904.86,m:1102.80},P3YA:{o:904.86,m:1102.80}},
+{id:'ms-e7-notms',c:'Microsoft 365 Enterprise',n:'M365 E7 (No Teams) EEA',P1MM:{o:83.20,m:101.40},P1YM:{o:72.80,m:88.73},P1YA:{o:832.00,m:1014.00},P3YA:{o:832.00,m:1014.00}},
+// Office 365
+{id:'ms-o365-e1',c:'Office 365',n:'Office 365 E1',P1MM:{o:7.39,m:8.40},P1YM:{o:6.46,m:7.56},P1YA:{o:73.92,m:84.00},P3YA:{o:73.92,m:84.00}},
+{id:'ms-o365-e3',c:'Office 365',n:'Office 365 E3',P1MM:{o:17.95,m:20.40},P1YM:{o:15.71,m:18.36},P1YA:{o:179.52,m:204.00},P3YA:{o:179.52,m:204.00}},
+{id:'ms-o365-e5',c:'Office 365',n:'Office 365 E5',P1MM:{o:32.24,m:36.64},P1YM:{o:28.21,m:32.98},P1YA:{o:322.40,m:366.40},P3YA:{o:322.40,m:366.40}},
+{id:'ms-o365-f3',c:'Office 365',n:'Office 365 F3',P1MM:{o:3.70,m:4.20},P1YM:{o:3.24,m:3.78},P1YA:{o:36.96,m:42.00},P3YA:{o:36.96,m:42.00}},
+{id:'ms-365-apps',c:'Office 365',n:'Microsoft 365 Apps for Enterprise',P1MM:{o:9.50,m:10.80},P1YM:{o:8.32,m:9.72},P1YA:{o:95.04,m:108.00},P3YA:{o:95.04,m:108.00}},
+// AI & Copilot
+{id:'ms-agent365',c:'AI & Copilot',n:'Agent 365',P1MM:{o:12.80,m:15.60},P1YM:{o:11.20,m:13.65},P1YA:{o:128.00,m:156.00},P3YA:{o:128.00,m:156.00}},
+{id:'ms-copilot',c:'AI & Copilot',n:'M365 Copilot Business',P1MM:{o:20.16,m:21.84},P1YM:null,P1YA:{o:201.60,m:218.40},P3YA:{o:201.60,m:218.40}},
+// Teams & Comms
+{id:'ms-teams-ess',c:'Teams & Comms',n:'Microsoft Teams Essentials',P1MM:{o:3.70,m:4.20},P1YM:{o:3.24,m:3.78},P1YA:{o:36.96,m:42.00},P3YA:{o:36.96,m:42.00}},
+{id:'ms-teams-prem',c:'Teams & Comms',n:'Microsoft Teams Premium',P1MM:{o:8.79,m:10.44},P1YM:{o:7.69,m:9.14},P1YA:{o:87.92,m:104.40},P3YA:{o:87.92,m:104.40}},
+{id:'ms-teams-phone',c:'Teams & Comms',n:'Teams Essential with Phone',P1MM:null,P1YM:null,P1YA:{o:102.40,m:124.80},P3YA:{o:102.40,m:124.80}},
+{id:'ms-adv-comms',c:'Teams & Comms',n:'Advanced Communications',P1MM:{o:10.51,m:12.48},P1YM:{o:9.20,m:10.92},P1YA:{o:105.09,m:124.80},P3YA:{o:105.09,m:124.80}},
+// Exchange
+{id:'ms-exo-p1',c:'Exchange Online',n:'Exchange Online Plan 1',P1MM:{o:3.70,m:4.20},P1YM:{o:3.24,m:3.78},P1YA:{o:36.96,m:42.00},P3YA:{o:36.96,m:42.00}},
+{id:'ms-exo-p2',c:'Exchange Online',n:'Exchange Online Plan 2',P1MM:{o:7.92,m:9.00},P1YM:{o:6.93,m:8.10},P1YA:{o:79.20,m:90.00},P3YA:{o:79.20,m:90.00}},
+{id:'ms-exo-kiosk',c:'Exchange Online',n:'Exchange Online Kiosk',P1MM:{o:1.58,m:1.80},P1YM:{o:1.38,m:1.62},P1YA:{o:15.84,m:18.00},P3YA:{o:15.84,m:18.00}},
+// SharePoint
+{id:'ms-spo-p1',c:'SharePoint Online',n:'SharePoint Online Plan 1',P1MM:{o:3.70,m:4.20},P1YM:{o:3.24,m:3.78},P1YA:{o:36.96,m:42.00},P3YA:{o:36.96,m:42.00}},
+{id:'ms-spo-p2',c:'SharePoint Online',n:'SharePoint Online Plan 2',P1MM:{o:7.92,m:9.00},P1YM:{o:6.93,m:8.10},P1YA:{o:79.20,m:90.00},P3YA:{o:79.20,m:90.00}},
+// Power BI
+{id:'ms-pbi-pro',c:'Power BI',n:'Power BI Pro',P1MM:{o:9.50,m:10.80},P1YM:{o:8.32,m:9.72},P1YA:{o:95.04,m:108.00},P3YA:{o:95.04,m:108.00}},
+{id:'ms-pbi-ppu',c:'Power BI',n:'Power BI Premium per User',P1MM:{o:17.60,m:20.00},P1YM:{o:15.40,m:18.00},P1YA:{o:176.00,m:200.00},P3YA:{o:176.00,m:200.00}},
+// Visio
+{id:'ms-visio-p1',c:'Visio',n:'Visio Plan 1',P1MM:{o:5.28,m:6.00},P1YM:{o:4.62,m:5.40},P1YA:{o:52.80,m:60.00},P3YA:{o:52.80,m:60.00}},
+{id:'ms-visio-p2',c:'Visio',n:'Visio Plan 2',P1MM:{o:13.20,m:15.00},P1YM:{o:11.55,m:13.50},P1YA:{o:132.00,m:150.00},P3YA:{o:132.00,m:150.00}},
+// Project
+{id:'ms-proj-p1',c:'Project',n:'Project Plan 1',P1MM:{o:8.80,m:10.00},P1YM:{o:7.70,m:9.00},P1YA:{o:88.00,m:100.00},P3YA:{o:88.00,m:100.00}},
+{id:'ms-proj-p3',c:'Project',n:'Project Plan 3',P1MM:{o:26.40,m:30.00},P1YM:{o:23.10,m:27.00},P1YA:{o:264.00,m:300.00},P3YA:{o:264.00,m:300.00}},
+{id:'ms-proj5',c:'Project',n:'Project Plan 5',P1MM:{o:26.27,m:31.20},P1YM:{o:22.99,m:27.30},P1YA:{o:262.74,m:312.00},P3YA:{o:262.74,m:312.00}},
+// Intune
+{id:'ms-intune',c:'Endpoint Management',n:'Microsoft Intune Plan 1',P1MM:{o:7.39,m:8.40},P1YM:{o:6.46,m:7.56},P1YA:{o:73.92,m:84.00},P3YA:{o:73.92,m:84.00}},
+{id:'ms-intune-p2',c:'Endpoint Management',n:'Microsoft Intune Plan 2',P1MM:{o:12.32,m:14.00},P1YM:{o:10.78,m:12.60},P1YA:{o:123.20,m:140.00},P3YA:{o:123.20,m:140.00}},
+// Security
+{id:'ms-def-o365',c:'Security',n:'Defender for Office 365 P2',P1MM:{o:2.55,m:3.12},P1YM:{o:2.22,m:2.73},P1YA:{o:25.60,m:31.20},P3YA:{o:25.47,m:31.20}},
+{id:'ms-def-ep',c:'Security',n:'Defender Endpoint P2 (M365 E3 add-on)',P1MM:{o:2.63,m:3.12},P1YM:{o:2.29,m:2.73},P1YA:{o:26.27,m:31.20},P3YA:{o:26.27,m:31.20}},
+{id:'ms-def-suite',c:'Security',n:'Defender Suite for M365 Business Premium',P1MM:{o:8.79,m:10.44},P1YM:{o:7.69,m:9.14},P1YA:{o:87.92,m:104.40},P3YA:{o:87.92,m:104.40}},
+{id:'ms-purview',c:'Security',n:'Purview Suite for M365 Business Premium',P1MM:{o:8.79,m:10.44},P1YM:{o:7.69,m:9.14},P1YA:{o:87.92,m:104.40},P3YA:{o:87.92,m:104.40}},
+{id:'ms-def-purview',c:'Security',n:'Defender + Purview for M365 BP',P1MM:{o:13.14,m:15.60},P1YM:{o:11.49,m:13.65},P1YA:{o:131.37,m:156.00},P3YA:{o:131.37,m:156.00}},
+{id:'ms-entra-p1',c:'Security',n:'Microsoft Entra ID P1',P1MM:{o:5.25,m:6.24},P1YM:{o:4.60,m:5.46},P1YA:{o:52.55,m:62.40},P3YA:{o:52.55,m:62.40}},
+{id:'ms-entra-p2',c:'Security',n:'Microsoft Entra ID P2',P1MM:{o:7.88,m:9.36},P1YM:{o:6.89,m:8.19},P1YA:{o:78.82,m:93.60},P3YA:{o:78.82,m:93.60}},
+{id:'ms-entra-p2-e3',c:'Security',n:'Entra P2 Add-On for M365 E3',P1MM:{o:3.03,m:3.60},P1YM:{o:2.65,m:3.15},P1YA:{o:30.32,m:36.00},P3YA:{o:30.32,m:36.00}},
+{id:'ms-audit',c:'Security',n:'10-Year Audit Log Retention',P1MM:{o:1.75,m:2.08},P1YM:{o:1.53,m:1.82},P1YA:{o:17.48,m:20.76},P3YA:{o:17.48,m:20.76}},
+{id:'ms-audit-flw',c:'Security',n:'10-Year Audit Log (FLW)',P1MM:{o:1.17,m:1.39},P1YM:{o:1.02,m:1.22},P1YA:{o:11.73,m:13.92},P3YA:{o:11.73,m:13.92}},
+{id:'ms-ediscov',c:'Security',n:'Advanced eDiscovery Storage',P1MM:{o:87.52,m:103.92},P1YM:{o:76.57,m:90.93},P1YA:{o:875.12,m:1039.20},P3YA:{o:875.12,m:1039.20}},
+// Windows 365
+{id:'ms-w365-2-4-64',c:'Windows 365',n:'Windows 365 Biz 2vCPU/4GB/64GB',P1MM:{o:19.69,m:24.00},P1YM:{o:18.61,m:22.68},P1YA:{o:212.68,m:259.20},P3YA:{o:212.68,m:259.20}},
+{id:'ms-w365-2-4-128',c:'Windows 365',n:'Windows 365 Biz 2vCPU/4GB/128GB',P1MM:{o:21.50,m:26.20},P1YM:{o:20.32,m:24.76},P1YA:{o:232.17,m:282.96},P3YA:{o:232.17,m:282.96}},
+{id:'ms-w365-2-8-128',c:'Windows 365',n:'Windows 365 Biz 2vCPU/8GB/128GB',P1MM:{o:27.65,m:33.70},P1YM:{o:26.13,m:31.85},P1YA:{o:298.64,m:363.96},P3YA:{o:298.64,m:363.96}},
+{id:'ms-w365-2-8-256',c:'Windows 365',n:'Windows 365 Biz 2vCPU/8GB/256GB',P1MM:{o:33.15,m:40.40},P1YM:{o:31.32,m:38.18},P1YA:{o:358.01,m:436.32},P3YA:{o:358.01,m:436.32}},
+{id:'ms-w365-4-16-128',c:'Windows 365',n:'Windows 365 Biz 4vCPU/16GB/128GB',P1MM:{o:42.99,m:52.40},P1YM:{o:40.63,m:49.52},P1YA:{o:464.35,m:565.92},P3YA:{o:464.35,m:565.92}},
+{id:'ms-w365-4-16-256',c:'Windows 365',n:'Windows 365 Biz 4vCPU/16GB/256GB',P1MM:{o:48.49,m:59.10},P1YM:{o:45.83,m:55.85},P1YA:{o:523.71,m:638.28},P3YA:{o:523.71,m:638.28}},
+{id:'ms-w365-4-16-512',c:'Windows 365',n:'Windows 365 Biz 4vCPU/16GB/512GB',P1MM:{o:64.49,m:78.60},P1YM:{o:60.94,m:74.28},P1YA:{o:696.51,m:848.88},P3YA:{o:696.51,m:848.88}},
+{id:'ms-w365-8-32-128',c:'Windows 365',n:'Windows 365 Biz 8vCPU/32GB/128GB',P1MM:{o:78.03,m:95.10},P1YM:{o:73.74,m:89.87},P1YA:{o:842.73,m:1027.08},P3YA:{o:842.73,m:1027.08}},
+{id:'ms-w365-8-32-256',c:'Windows 365',n:'Windows 365 Biz 8vCPU/32GB/256GB',P1MM:{o:83.53,m:101.80},P1YM:{o:78.93,m:96.20},P1YA:{o:902.10,m:1099.44},P3YA:{o:902.10,m:1099.44}},
+{id:'ms-w365-8-32-512',c:'Windows 365',n:'Windows 365 Biz 8vCPU/32GB/512GB',P1MM:{o:99.53,m:121.30},P1YM:{o:94.05,m:114.63},P1YA:{o:1074.90,m:1310.04},P3YA:{o:1074.90,m:1310.04}},
+{id:'ms-w365-16-64-512',c:'Windows 365',n:'Windows 365 Biz 16vCPU/64GB/512GB',P1MM:{o:172.81,m:210.40},P1YM:{o:163.31,m:198.83},P1YA:{o:1866.39,m:2272.32},P3YA:{o:1866.39,m:2272.32}},
+{id:'ms-w365-16-64-1tb',c:'Windows 365',n:'Windows 365 Biz 16vCPU/64GB/1TB',P1MM:{o:196.14,m:238.80},P1YM:{o:185.35,m:225.67},P1YA:{o:2118.31,m:2579.04},P3YA:{o:2118.31,m:2579.04}},
+// Dynamics 365
+{id:'ms-d365-ess',c:'Dynamics 365',n:'D365 BC Essentials',P1MM:{o:59.70,m:83.16},P1YM:{o:52.25,m:72.77},P1YA:{o:597.05,m:831.60},P3YA:{o:597.05,m:831.60}},
+{id:'ms-d365-prem',c:'Dynamics 365',n:'D365 BC Premium',P1MM:null,P1YM:{o:71.85,m:100.07},P1YA:{o:821.05,m:1143.60},P3YA:{o:821.05,m:1143.60}},
+{id:'ms-d365-team',c:'Dynamics 365',n:'D365 BC Team Members',P1MM:null,P1YM:{o:5.20,m:7.25},P1YA:{o:59.45,m:82.80},P3YA:{o:59.45,m:82.80}},
+{id:'ms-d365-dev',c:'Dynamics 365',n:'D365 BC Device',P1MM:{o:33.60,m:46.80},P1YM:{o:29.41,m:40.95},P1YA:{o:336.00,m:468.00},P3YA:{o:336.00,m:468.00}},
+{id:'ms-d365-cc',c:'Dynamics 365',n:'D365 Contact Center Add-on',P1MM:null,P1YM:null,P1YA:null,P3YA:{o:720.00,m:936.00}},
+{id:'ms-d365-csp',c:'Dynamics 365',n:'D365 Customer Service Premium',P1MM:null,P1YM:null,P1YA:null,P3YA:{o:1560.00,m:2028.00}},
+// Power Platform
+{id:'ms-dv-db',c:'Power Platform',n:'Dataverse Database Capacity',P1MM:{o:32.87,m:41.64},P1YM:{o:28.77,m:36.43},P1YA:{o:328.74,m:416.40},P3YA:{o:328.74,m:416.40}},
+{id:'ms-dv-file',c:'Power Platform',n:'Dataverse File Capacity',P1MM:{o:1.64,m:2.08},P1YM:{o:1.43,m:1.82},P1YA:{o:16.39,m:20.76},P3YA:{o:16.39,m:20.76}},
+{id:'ms-dv-log',c:'Power Platform',n:'Dataverse Log Capacity',P1MM:{o:8.24,m:10.44},P1YM:{o:7.21,m:9.14},P1YA:{o:82.42,m:104.40},P3YA:{o:82.42,m:104.40}},
+// Teams Events
+{id:'ms-tev-5k',c:'Teams Events',n:'Teams Events – 5k attendees',P1MM:{o:1145.83,m:1403.64},P1YM:null,P1YA:{o:11517.05,m:14036.40},P3YA:null},
+{id:'ms-tev-10k',c:'Teams Events',n:'Teams Events – 10k attendees',P1MM:{o:3013.22,m:3691.20},P1YM:null,P1YA:{o:30286.77,m:36912.00},P3YA:null},
+{id:'ms-tev-20k',c:'Teams Events',n:'Teams Events – 20k attendees',P1MM:{o:4519.84,m:5536.80},P1YM:null,P1YA:{o:45430.15,m:55368.00},P3YA:null},
+{id:'ms-tev-35k',c:'Teams Events',n:'Teams Events – 35k attendees',P1MM:{o:8286.66,m:10151.16},P1YM:null,P1YA:{o:83291.57,m:101511.60},P3YA:null},
+{id:'ms-tev-50k',c:'Teams Events',n:'Teams Events – 50k attendees',P1MM:{o:12052.80,m:14764.68},P1YM:null,P1YA:{o:121146.09,m:147646.80},P3YA:null},
+{id:'ms-tev-75k',c:'Teams Events',n:'Teams Events – 75k attendees',P1MM:{o:17326.34,m:21224.76},P1YM:null,P1YA:{o:174151.88,m:212247.60},P3YA:null},
+{id:'ms-tev-100k',c:'Teams Events',n:'Teams Events – 100k attendees',P1MM:{o:22598.99,m:27683.76},P1YM:null,P1YA:{o:227148.80,m:276837.60},P3YA:null},
+// AI & Copilot additions
+{id:'ms-dragon-copilot',c:'AI & Copilot',n:'Dragon Copilot (Physician Practice per User)',P1MM:null,P1YM:null,P1YA:{o:853.66,m:1040.40},P3YA:null},
+// Dynamics 365 additions
+{id:'ms-d365-ess-att',c:'Dynamics 365',n:'D365 BC Essentials Attach',P1MM:null,P1YM:{o:13.97,m:18.16},P1YA:{o:159.69,m:207.60},P3YA:{o:159.69,m:207.60}},
+{id:'ms-d365-env',c:'Dynamics 365',n:'D365 BC Additional Environment Add-on',P1MM:{o:223.92,m:311.88},P1YM:{o:195.93,m:272.90},P1YA:{o:2239.14,m:3118.80},P3YA:null},
+{id:'ms-d365-db-cap',c:'Dynamics 365',n:'D365 BC Database Capacity',P1MM:{o:7.50,m:10.44},P1YM:{o:6.56,m:9.14},P1YA:{o:74.95,m:104.40},P3YA:null},
+{id:'ms-d365-db-100gb',c:'Dynamics 365',n:'D365 BC Database Capacity 100GB',P1MM:{o:373.22,m:519.84},P1YM:null,P1YA:{o:3732.18,m:5198.40},P3YA:null},
+{id:'ms-d365-db-ovr',c:'Dynamics 365',n:'D365 BC Database Capacity Overage',P1MM:{o:3.70,m:5.16},P1YM:{o:3.24,m:4.52},P1YA:{o:37.05,m:51.60},P3YA:null},
+{id:'ms-d365-dev-100',c:'Dynamics 365',n:'D365 BC Device (100 seat min)',P1MM:{o:26.79,m:36.36},P1YM:{o:23.44,m:31.82},P1YA:{o:267.92,m:363.60},P3YA:null},
+{id:'ms-d365-ops-ol',c:'Dynamics 365',n:'D365 Operations – Order Lines',P1MM:{o:373.22,m:519.84},P1YM:null,P1YA:{o:3732.18,m:5198.40},P3YA:null},
+{id:'ms-d365-asset',c:'Dynamics 365',n:'D365 Asset Management Additional Assets',P1MM:{o:74.61,m:103.92},P1YM:null,P1YA:{o:746.09,m:1039.20},P3YA:null},
+{id:'ms-d365-commerce',c:'Dynamics 365',n:'D365 Commerce',P1MM:null,P1YM:null,P1YA:{o:1568.00,m:2184.00},P3YA:null},
+// Power Platform additions
+{id:'ms-ai-builder-t1-eur',c:'Power Platform',n:'AI Builder Capacity Add-on T1 (EUR)',P1MM:null,P1YM:null,P1YA:{o:5320.42,m:5616.00},P3YA:null},
+{id:'ms-ai-builder-t2-eur',c:'Power Platform',n:'AI Builder Capacity Add-on T2 – min 10 packs (EUR)',P1MM:null,P1YM:null,P1YA:{o:3990.32,m:4212.00},P3YA:null},
+{id:'ms-ai-builder-t3-eur',c:'Power Platform',n:'AI Builder Capacity Add-on T3 – min 50 packs (EUR)',P1MM:null,P1YM:null,P1YA:{o:2660.21,m:2808.00},P3YA:null},
+{id:'ms-dv-db-t2',c:'Power Platform',n:'Dataverse Database Capacity Tier 2 (1000GB min)',P1MM:{o:24.00,m:31.20},P1YM:{o:21.00,m:27.30},P1YA:{o:240.00,m:312.00},P3YA:{o:240.00,m:312.00}},
+// Security additions
+{id:'ms-adv-data-res',c:'Security',n:'Advanced Data Residency',P1MM:null,P1YM:null,P1YA:{o:17.48,m:20.76},P3YA:{o:17.48,m:20.76}},
+{id:'ms-cross-shared',c:'Security',n:'Cross-Tenant Shared Data Migration',P1MM:null,P1YM:null,P1YA:{o:35.37,m:42.00},P3YA:null},
+{id:'ms-cross-user',c:'Security',n:'Cross-Tenant User Data Migration',P1MM:null,P1YM:null,P1YA:{o:10.92,m:12.96},P3YA:null},
+// Windows 365 additions
+{id:'ms-w365-reserve',c:'Windows 365',n:'Windows 365 Reserve',P1MM:null,P1YM:null,P1YA:{o:15.36,m:18.72},P3YA:null},
+{id:'ms-w365-2-4-64-hb',c:'Windows 365 Hybrid Benefit',n:'Windows 365 Biz 2vCPU/4GB/64GB (Hybrid Benefit)',P1MM:{o:19.69,m:24.00},P1YM:{o:18.61,m:22.68},P1YA:{o:212.68,m:259.20},P3YA:{o:212.68,m:259.20}},
+{id:'ms-w365-2-4-128-hb',c:'Windows 365 Hybrid Benefit',n:'Windows 365 Biz 2vCPU/4GB/128GB (Hybrid Benefit)',P1MM:{o:21.50,m:26.20},P1YM:{o:20.32,m:24.76},P1YA:{o:232.17,m:282.96},P3YA:{o:232.17,m:282.96}},
+{id:'ms-w365-2-4-256-hb',c:'Windows 365 Hybrid Benefit',n:'Windows 365 Biz 2vCPU/4GB/256GB (Hybrid Benefit)',P1MM:{o:26.99,m:32.90},P1YM:{o:25.51,m:31.09},P1YA:{o:291.55,m:355.32},P3YA:{o:291.55,m:355.32}},
+{id:'ms-w365-2-8-128-hb',c:'Windows 365 Hybrid Benefit',n:'Windows 365 Biz 2vCPU/8GB/128GB (Hybrid Benefit)',P1MM:{o:27.65,m:33.70},P1YM:{o:26.13,m:31.85},P1YA:{o:298.64,m:363.96},P3YA:{o:298.64,m:363.96}},
+{id:'ms-w365-2-8-256-hb',c:'Windows 365 Hybrid Benefit',n:'Windows 365 Biz 2vCPU/8GB/256GB (Hybrid Benefit)',P1MM:{o:33.15,m:40.40},P1YM:{o:31.32,m:38.18},P1YA:{o:358.01,m:436.32},P3YA:{o:358.01,m:436.32}},
+{id:'ms-w365-4-16-128-hb',c:'Windows 365 Hybrid Benefit',n:'Windows 365 Biz 4vCPU/16GB/128GB (Hybrid Benefit)',P1MM:{o:42.99,m:52.40},P1YM:{o:40.63,m:49.52},P1YA:{o:464.35,m:565.92},P3YA:{o:464.35,m:565.92}},
+{id:'ms-w365-4-16-256-hb',c:'Windows 365 Hybrid Benefit',n:'Windows 365 Biz 4vCPU/16GB/256GB (Hybrid Benefit)',P1MM:{o:48.49,m:59.10},P1YM:{o:45.83,m:55.85},P1YA:{o:523.71,m:638.28},P3YA:{o:523.71,m:638.28}},
+{id:'ms-w365-4-16-512-hb',c:'Windows 365 Hybrid Benefit',n:'Windows 365 Biz 4vCPU/16GB/512GB (Hybrid Benefit)',P1MM:{o:64.49,m:78.60},P1YM:{o:60.94,m:74.28},P1YA:{o:696.51,m:848.88},P3YA:{o:696.51,m:848.88}},
+{id:'ms-w365-8-32-128-hb',c:'Windows 365 Hybrid Benefit',n:'Windows 365 Biz 8vCPU/32GB/128GB (Hybrid Benefit)',P1MM:{o:78.03,m:95.10},P1YM:{o:73.74,m:89.87},P1YA:{o:842.73,m:1027.08},P3YA:{o:842.73,m:1027.08}},
+{id:'ms-w365-8-32-256-hb',c:'Windows 365 Hybrid Benefit',n:'Windows 365 Biz 8vCPU/32GB/256GB (Hybrid Benefit)',P1MM:{o:83.53,m:101.80},P1YM:{o:78.93,m:96.20},P1YA:{o:902.10,m:1099.44},P3YA:{o:902.10,m:1099.44}},
+{id:'ms-w365-8-32-512-hb',c:'Windows 365 Hybrid Benefit',n:'Windows 365 Biz 8vCPU/32GB/512GB (Hybrid Benefit)',P1MM:{o:99.53,m:121.30},P1YM:{o:94.05,m:114.63},P1YA:{o:1074.90,m:1310.04},P3YA:{o:1074.90,m:1310.04}},
+{id:'ms-w365-16-64-512-hb',c:'Windows 365 Hybrid Benefit',n:'Windows 365 Biz 16vCPU/64GB/512GB (Hybrid Benefit)',P1MM:{o:172.81,m:210.40},P1YM:{o:163.31,m:198.83},P1YA:{o:1866.39,m:2272.32},P3YA:{o:1866.39,m:2272.32}},
+{id:'ms-w365-16-64-1tb-hb',c:'Windows 365 Hybrid Benefit',n:'Windows 365 Biz 16vCPU/64GB/1TB (Hybrid Benefit)',P1MM:{o:196.14,m:238.80},P1YM:{o:185.35,m:225.67},P1YA:{o:2118.31,m:2579.04},P3YA:{o:2118.31,m:2579.04}},
+],
+usd:[
+{id:'ms-u-adv-comms',c:'Teams & Comms',n:'Advanced Communications',P1MM:{o:11.87,m:14.40},P1YA:{o:118.66,m:144.00}},
+{id:'ms-u-ediscov',c:'Security',n:'Advanced eDiscovery Storage',P1MM:{o:98.88,m:120.00},P1YA:{o:988.80,m:1200.00}},
+{id:'ms-u-audit',c:'Security',n:'10-Year Audit Log Retention',P1MM:{o:1.98,m:2.40},P1YA:{o:19.78,m:24.00}},
+{id:'ms-u-def-o365',c:'Security',n:'Defender for Office 365 P2',P1MM:{o:2.97,m:3.60},P1YA:{o:29.66,m:36.00}},
+{id:'ms-u-def-ep',c:'Security',n:'Defender Endpoint P2 (M365 E3 add-on)',P1MM:{o:2.97,m:3.60},P1YA:{o:29.66,m:36.00}},
+{id:'ms-u-entra-p1',c:'Security',n:'Azure AD / Entra ID P1',P1MM:null,P1YA:{o:59.33,m:72.00}},
+{id:'ms-u-aip-p1',c:'Security',n:'Azure Information Protection P1',P1MM:{o:1.98,m:2.40},P1YA:{o:19.78,m:24.00}},
+{id:'ms-u-d365-ess',c:'Dynamics 365',n:'D365 BC Essentials',P1MM:{o:69.22,m:96.00},P1YA:{o:692.16,m:960.00}},
+{id:'ms-u-d365-prem',c:'Dynamics 365',n:'D365 BC Premium',P1MM:{o:95.17,m:132.00},P1YA:null},
+{id:'ms-u-d365-dev',c:'Dynamics 365',n:'D365 BC Device',P1MM:{o:38.93,m:54.00},P1YA:{o:389.34,m:540.00}},
+{id:'ms-u-ai-builder',c:'Power Platform',n:'AI Builder Capacity Add-On T1',P1MM:{o:556.20,m:600.00},P1YA:{o:5562.00,m:6000.00}},
+{id:'ms-u-dv-db',c:'Power Platform',n:'Dataverse Database Capacity',P1MM:{o:37.08,m:48.00},P1YA:{o:370.80,m:480.00}},
+{id:'ms-u-dv-file',c:'Power Platform',n:'Dataverse File Capacity',P1MM:{o:1.85,m:2.40},P1YA:{o:18.54,m:24.00}},
+{id:'ms-u-dv-log',c:'Power Platform',n:'Dataverse Log Capacity',P1MM:{o:9.27,m:12.00},P1YA:{o:92.70,m:120.00}},
+]},
+adobe:[
+// Creative Cloud
+{id:'ab-cc-all-ent',c:'Creative Cloud Enterprise',n:'Creative Cloud All Apps for Enterprise',rrp:79.99,our:77.59,unit:'users'},
+{id:'ab-cc-all-tm',c:'Creative Cloud Teams',n:'Creative Cloud All Apps for Teams',rrp:71.99,our:69.83,unit:'users'},
+{id:'ab-photoshop-ent',c:'Creative Cloud Enterprise',n:'Photoshop for Enterprise',rrp:38.99,our:37.81,unit:'users'},
+{id:'ab-photoshop-tm',c:'Creative Cloud Teams',n:'Photoshop for Teams',rrp:29.99,our:29.09,unit:'users'},
+{id:'ab-illustrator-ent',c:'Creative Cloud Enterprise',n:'Illustrator for Enterprise',rrp:38.99,our:37.81,unit:'users'},
+{id:'ab-illustrator-tm',c:'Creative Cloud Teams',n:'Illustrator for Teams',rrp:29.99,our:29.09,unit:'users'},
+{id:'ab-premiere-ent',c:'Creative Cloud Enterprise',n:'Premiere Pro for Enterprise',rrp:59.99,our:58.19,unit:'users'},
+{id:'ab-premiere-tm',c:'Creative Cloud Teams',n:'Premiere Pro for Teams',rrp:54.99,our:53.34,unit:'users'},
+{id:'ab-afterfx-ent',c:'Creative Cloud Enterprise',n:'After Effects for Enterprise',rrp:59.99,our:58.19,unit:'users'},
+{id:'ab-afterfx-tm',c:'Creative Cloud Teams',n:'After Effects for Teams',rrp:54.99,our:53.34,unit:'users'},
+{id:'ab-indesign-ent',c:'Creative Cloud Enterprise',n:'InDesign for Enterprise',rrp:38.99,our:37.81,unit:'users'},
+{id:'ab-indesign-tm',c:'Creative Cloud Teams',n:'InDesign for Teams',rrp:29.99,our:29.09,unit:'users'},
+{id:'ab-lightroom-ent',c:'Creative Cloud Enterprise',n:'Lightroom CC for Enterprise',rrp:14.99,our:14.54,unit:'users'},
+{id:'ab-lightroom-tm',c:'Creative Cloud Teams',n:'Lightroom CC for Teams',rrp:11.99,our:11.63,unit:'users'},
+{id:'ab-express-ent',c:'Creative Cloud Enterprise',n:'Adobe Express for Enterprise',rrp:10.99,our:10.66,unit:'users'},
+{id:'ab-substance-tm',c:'Creative Cloud Teams',n:'Adobe Substance 3D Collection for Teams',rrp:49.99,our:48.49,unit:'users'},
+{id:'ab-firefly-ent',c:'Creative Cloud Enterprise',n:'Adobe Firefly Services for Enterprise',rrp:119.88,our:116.28,unit:'users'},
+// Acrobat Pro Enterprise
+{id:'ab-acp-ent-1',c:'Acrobat Pro Enterprise',n:'Acrobat Pro Enterprise (1–9 users)',rrp:335.88,our:325.89,unit:'users'},
+{id:'ab-acp-ent-10',c:'Acrobat Pro Enterprise',n:'Acrobat Pro Enterprise (10–49 users)',rrp:319.08,our:309.59,unit:'users'},
+{id:'ab-acp-ent-50',c:'Acrobat Pro Enterprise',n:'Acrobat Pro Enterprise (50–99 users)',rrp:302.28,our:293.29,unit:'users'},
+{id:'ab-acp-ent-100',c:'Acrobat Pro Enterprise',n:'Acrobat Pro Enterprise (100+ users)',rrp:285.48,our:276.99,unit:'users'},
+{id:'ab-acp-ent-h100',c:'Acrobat Pro Enterprise',n:'Acrobat Pro Enterprise HGO 100 MOQ',rrp:218.28,our:211.79,unit:'users'},
+{id:'ab-acp-ent-h250',c:'Acrobat Pro Enterprise',n:'Acrobat Pro Enterprise HGO 250 MOQ',rrp:201.48,our:195.49,unit:'users'},
+{id:'ab-acp-ent-h500',c:'Acrobat Pro Enterprise',n:'Acrobat Pro Enterprise HGO 500 MOQ',rrp:184.68,our:179.18,unit:'users'},
+// Acrobat Pro Teams
+{id:'ab-acp-tm-1',c:'Acrobat Pro Teams',n:'Acrobat Pro Teams (1–9 users)',rrp:287.88,our:279.32,unit:'users'},
+{id:'ab-acp-tm-10',c:'Acrobat Pro Teams',n:'Acrobat Pro Teams (10–24 users)',rrp:273.48,our:265.35,unit:'users'},
+{id:'ab-acp-tm-25',c:'Acrobat Pro Teams',n:'Acrobat Pro Teams 25 Pack',rrp:247.56,our:240.22,unit:'users'},
+{id:'ab-acp-tm-50',c:'Acrobat Pro Teams',n:'Acrobat Pro Teams 50 Pack',rrp:221.64,our:215.10,unit:'users'},
+{id:'ab-acp-tm-h100',c:'Acrobat Pro Teams',n:'Acrobat Pro Teams HGO 100 MOQ',rrp:187.08,our:181.51,unit:'users'},
+{id:'ab-acp-tm-h250',c:'Acrobat Pro Teams',n:'Acrobat Pro Teams HGO 250 MOQ',rrp:172.68,our:167.54,unit:'users'},
+{id:'ab-acp-tm-h500',c:'Acrobat Pro Teams',n:'Acrobat Pro Teams HGO 500 MOQ',rrp:158.28,our:153.57,unit:'users'},
+{id:'ab-acp-2024-ent',c:'Acrobat Pro 2024',n:'Acrobat Pro 2024 Enterprise',rrp:134.04,our:130.04,unit:'users'},
+{id:'ab-acp-2024-tm',c:'Acrobat Pro 2024',n:'Acrobat Pro 2024 Teams',rrp:134.04,our:130.04,unit:'users'},
+// AI & Credits
+{id:'ab-ai-ent',c:'AI Assistant',n:'AI Assistant for Acrobat Enterprise',rrp:60.36,our:52.46,unit:'users'},
+{id:'ab-ai-tm',c:'AI Assistant',n:'AI Assistant for Acrobat Teams',rrp:59.64,our:51.72,unit:'users'},
+{id:'ab-gen-2k-e',c:'Generative Credits',n:'2,000 Monthly Gen Credits (Enterprise)',rrp:92.40,our:89.59,unit:'users'},
+{id:'ab-gen-2k-t',c:'Generative Credits',n:'2,000 Monthly Gen Credits (Teams)',rrp:92.40,our:89.59,unit:'users'},
+{id:'ab-gen-7k-e',c:'Generative Credits',n:'7,000 Monthly Gen Credits (Enterprise)',rrp:277.20,our:268.90,unit:'users'},
+{id:'ab-gen-7k-t',c:'Generative Credits',n:'7,000 Monthly Gen Credits (Teams)',rrp:277.20,our:268.90,unit:'users'},
+{id:'ab-gen-50k-e',c:'Generative Credits',n:'50,000 Monthly Gen Credits (Enterprise)',rrp:1848.72,our:1793.81,unit:'users'},
+{id:'ab-gen-50k-t',c:'Generative Credits',n:'50,000 Monthly Gen Credits (Teams)',rrp:1848.72,our:1793.81,unit:'users'},
+// Sign
+{id:'ab-sign-biz-1',c:'Acrobat Sign Business',n:'Acrobat Sign Business (1–9 users)/yr',rrp:360.00,our:275.76,unit:'users'},
+{id:'ab-sign-biz-10',c:'Acrobat Sign Business',n:'Acrobat Sign Business (10–49 users)/yr',rrp:336.00,our:257.38,unit:'users'},
+{id:'ab-sign-biz-50',c:'Acrobat Sign Business',n:'Acrobat Sign Business (50+ users)/yr',rrp:312.00,our:238.99,unit:'users'},
+{id:'ab-sign-ent-1',c:'Acrobat Sign Enterprise',n:'Acrobat Sign Enterprise (1–9 users)/yr',rrp:480.00,our:367.68,unit:'users'},
+{id:'ab-sign-ent-10',c:'Acrobat Sign Enterprise',n:'Acrobat Sign Enterprise (10–49 users)/yr',rrp:456.00,our:349.30,unit:'users'},
+{id:'ab-sign-ent-50',c:'Acrobat Sign Enterprise',n:'Acrobat Sign Enterprise (50–99 users)/yr',rrp:432.00,our:330.92,unit:'users'},
+{id:'ab-sign-ent-100',c:'Acrobat Sign Enterprise',n:'Acrobat Sign Enterprise (100+ users)/yr',rrp:408.00,our:312.53,unit:'users'},
+{id:'ab-sign-acq-1',c:'Acrobat Sign Acquisition Offer',n:'Sign Acquisition Offer (1–9 users)/yr',rrp:384.00,our:294.15,unit:'users'},
+{id:'ab-sign-acq-10',c:'Acrobat Sign Acquisition Offer',n:'Sign Acquisition Offer (10+ users)/yr',rrp:288.00,our:220.61,unit:'users'},
+{id:'ab-sign-acq-25',c:'Acrobat Sign Acquisition Offer',n:'Sign Acquisition Offer (25+ users)/yr',rrp:268.80,our:205.90,unit:'users'},
+{id:'ab-sign-acq-50',c:'Acrobat Sign Acquisition Offer',n:'Sign Acquisition Offer (50+ users)/yr',rrp:249.60,our:191.20,unit:'users'},
+// Sign transactions
+{id:'ab-sign-trx-std',c:'Acrobat Sign Transactions',n:'Sign per-transaction (<1k/mo)',rrp:3.48,our:2.67,unit:'transactions/mo'},
+{id:'ab-sign-trx-1k',c:'Acrobat Sign Transactions',n:'Sign per-transaction (1k+/mo)',rrp:2.44,our:1.87,unit:'transactions/mo'},
+{id:'ab-sign-trx-2k',c:'Acrobat Sign Transactions',n:'Sign per-transaction (2.5k+/mo)',rrp:2.09,our:1.60,unit:'transactions/mo'},
+{id:'ab-sign-trx-5k',c:'Acrobat Sign Transactions',n:'Sign per-transaction (5k+/mo)',rrp:1.91,our:1.47,unit:'transactions/mo'},
+{id:'ab-sign-msg-std',c:'Acrobat Sign MSG Delivery',n:'Sign MSG Delivery Add-On (<1k/mo)',rrp:2.00,our:1.53,unit:'transactions/mo'},
+{id:'ab-sign-msg-1k',c:'Acrobat Sign MSG Delivery',n:'Sign MSG Delivery Add-On (1k+/mo)',rrp:1.40,our:1.07,unit:'transactions/mo'},
+{id:'ab-sign-msg-2k',c:'Acrobat Sign MSG Delivery',n:'Sign MSG Delivery Add-On (2.5k+/mo)',rrp:1.20,our:0.92,unit:'transactions/mo'},
+{id:'ab-sign-msg-5k',c:'Acrobat Sign MSG Delivery',n:'Sign MSG Delivery Add-On (5k+/mo)',rrp:1.10,our:0.85,unit:'transactions/mo'},
+// API
+{id:'ab-api-25k',c:'Acrobat Services API',n:'Acrobat Services API – 25K Trans/yr',rrp:1875.00,our:1819.30,unit:'subscriptions'},
+{id:'ab-api-75k',c:'Acrobat Services API',n:'Acrobat Services API – 75K Trans/yr',rrp:5250.00,our:5093.90,unit:'subscriptions'},
+{id:'ab-api-250k',c:'Acrobat Services API',n:'Acrobat Services API – 250K Trans/yr',rrp:16249.92,our:15766.93,unit:'subscriptions'},
+{id:'ab-api-500k',c:'Acrobat Services API',n:'Acrobat Services API – 500K Trans/yr',rrp:30000.00,our:29108.36,unit:'subscriptions'},
+{id:'ab-api-750k',c:'Acrobat Services API',n:'Acrobat Services API – 750K Trans/yr',rrp:41250.00,our:40023.94,unit:'subscriptions'},
+],
+pw:[
+{id:'spendbase',bid:'sb',n:'Spendbase Password Manager',mp:3.00,op:3.00,cur:'EUR',rec:true,desc:'€3.00/user/mo — €1.50 cheaper than any market alternative'},
+{id:'bitwarden',bid:'bw',n:'Bitwarden Enterprise',mp:6.00,op:5.40,cur:'USD',rec:false,desc:'Open-source, highly secure vault'},
+{id:'lastpass',bid:'lp',n:'LastPass Business',mp:6.50,op:4.50,cur:'EUR',rec:false,desc:'Easy to use, wide integrations'},
+{id:'1password',bid:'1p',n:'1Password Business',mp:8.00,op:6.50,cur:'EUR',rec:false,desc:'Premium UX, team vault sharing'},
+]};
+
+function calcApp(){return{
+D,
+region:null,regionScope:'all',gwRegion:null,msRegion:null,
+svc:{gw:false,ms:false,adobe:false,pw:false,cc:false},
+gw:{cur:'eur',billing:'commit',planId:'',qty:1},
+gwItems:[],gwCur:'eur',gwBilling:'commit',gwPlanId:'',gwQty:1,
+msItems:[],msCycle:'P1YA',msEntity:'eur',msSearch:'',
+adobeItems:[],adobeSearch:'',
+pw:{productId:null,qty:1},
+cc:{
+  gcp:{isSaaS:null,hasFunding:null,usedScale:null},
+  aws:{monthlySpend:0,appliedBefore:null,hasFunding:null,usesAnthropic:null,usesGPU:null,foundedYear:''},
+  az:{criteria:{under:false,second:false,tech:false,b2b:false,ai:false,mvp:false,backed:false},monthlySpend:0},
+  cf:{software:null,last5:null,linkedin:false,funded:false}
+},
+totalMo:0,totalAn:0,
+
+init(){
+  const upd=()=>{
+    let mo=0,an=0;
+    if(this.svc.gw){this.gwItems.forEach(it=>{const pl=it.cur==='eur'?D.gw.eur.std:D.gw.usd.std;const p=pl.find(x=>x.id===it.planId);if(!p)return;const mkt=it.billing==='commit'?p.cm:p.fl;const our=it.billing==='commit'?p.oc:p.of;const d=(mkt-our)*it.qty;mo+=d;an+=d*12;});}
+    if(this.svc.ms){this.msItems.forEach(it=>{const s=it.entity==='eur'?D.ms.eur:D.ms.usd;const sk=s.find(x=>x.id===it.skuId);if(!sk)return;const p=sk[it.cycle];if(!p)return;const an2=it.cycle==='P1YA'||it.cycle==='P3YA';const d=(p.m-p.o)*it.qty;if(an2){mo+=d/12;an+=d;}else{mo+=d;an+=d*12;}});}
+    if(this.svc.adobe){this.adobeItems.forEach(it=>{const p=D.adobe.find(x=>x.id===it.skuId);if(!p)return;const d=(p.rrp-p.our)*it.qty;mo+=d/12;an+=d;});}
+    if(this.svc.pw&&this.pw.productId){const d=1.50*this.pw.qty;mo+=d;an+=d*12;}
+    this.totalMo=mo;this.totalAn=an;
+  };
+  ['svc.gw','svc.ms','svc.adobe','svc.pw','gwItems','msItems','adobeItems','pw.productId','pw.qty'].forEach(k=>this.$watch(k,upd));
+},
+triggerUpdate(){this.$nextTick(()=>{const e=new Event('alpine:update');document.dispatchEvent(e);});},
+
+setRegion(r){this.region=r;this.gwRegion=r;this.msRegion=r;if(r==='europe'){this.gwCur='eur';this.msEntity='eur';}else if(r==='ukraine'){this.msEntity='usd';}else{this.gwCur='usd';}},
+effRegion(s){if(this.regionScope==='per'){if(s==='gw')return this.gwRegion||this.region;if(s==='ms')return this.msRegion||this.region;}return this.region;},
+
+get gwPlans(){return this.gwCur==='eur'?D.gw.eur.std:D.gw.usd.std;},
+get gwTotalSaveMo(){let t=0;this.gwItems.forEach(it=>{const pl=it.cur==='eur'?D.gw.eur.std:D.gw.usd.std;const p=pl.find(x=>x.id===it.planId);if(!p)return;const mkt=it.billing==='commit'?p.cm:p.fl;const our=it.billing==='commit'?p.oc:p.of;t+=(mkt-our)*it.qty;});return t;},
+get gwUpgrade(){if(!this.gwPlanId||this.gwCur!=='eur')return null;const sel=D.gw.eur.std.find(p=>p.id===this.gwPlanId);if(!sel)return null;const u=D.gw.eur.up.find(x=>x.from===sel.n);if(!u)return null;const newP=this.gwBilling==='commit'?u.cm:u.fl;const upP=this.gwBilling==='commit'?u.oc:u.of;return{from:u.from,to:u.to,extra:+(newP-upP).toFixed(2),uid:u.id};},
+addGwItem(){if(!this.gwPlanId)return;const ex=this.gwItems.find(i=>i.planId===this.gwPlanId&&i.billing===this.gwBilling&&i.cur===this.gwCur);if(ex){this.gwItems.splice(this.gwItems.indexOf(ex),1,{...ex,qty:ex.qty+this.gwQty});}else{this.gwItems.push({planId:this.gwPlanId,billing:this.gwBilling,qty:this.gwQty,cur:this.gwCur});}this.gwPlanId='';this.gwQty=1;},
+removeGwItem(i){this.gwItems.splice(i,1);},
+updateGwQty(i,v){this.gwItems.splice(i,1,{...this.gwItems[i],qty:Math.max(1,parseInt(v)||1)});},
+applyUpgrade(){const u=this.gwUpgrade;if(!u)return;const found=D.gw.eur.up.find(x=>x.id===u.uid);if(found){const dest=D.gw.eur.std.find(p=>p.n===found.to);if(dest)this.gwPlanId=dest.id;}},
+gwItemName(it){const pl=it.cur==='eur'?D.gw.eur.std:D.gw.usd.std;return pl.find(p=>p.id===it.planId)?.n||it.planId;},
+gwItemSaveMo(it){const pl=it.cur==='eur'?D.gw.eur.std:D.gw.usd.std;const p=pl.find(x=>x.id===it.planId);if(!p)return 0;const mkt=it.billing==='commit'?p.cm:p.fl;const our=it.billing==='commit'?p.oc:p.of;return(mkt-our)*it.qty;},
+
+get filteredMs(){const s=this.msSearch.toLowerCase();const src=this.msEntity==='eur'?D.ms.eur:D.ms.usd;return src.filter(x=>!!x[this.msCycle]&&(!s||x.n.toLowerCase().includes(s)||x.c.toLowerCase().includes(s)));},
+getMsPrice(sk){const p=sk[this.msCycle];if(!p)return'—';const sym=this.msEntity==='eur'?'€':'$';const an=this.msCycle==='P1YA'||this.msCycle==='P3YA';return sym+(an?p.o/12:p.o).toFixed(2)+'/mo';},
+getMsDisc(sk){const p=sk[this.msCycle];if(!p)return 0;return Math.round(((p.m-p.o)/p.m)*100);},
+addMs(id){const ex=this.msItems.find(i=>i.skuId===id&&i.cycle===this.msCycle&&i.entity===this.msEntity);if(ex){this.msItems.splice(this.msItems.indexOf(ex),1,{...ex,qty:ex.qty+1});}else{this.msItems.push({skuId:id,qty:1,cycle:this.msCycle,entity:this.msEntity});}},
+getMsName(it){const s=it.entity==='eur'?D.ms.eur:D.ms.usd;return s.find(x=>x.id===it.skuId)?.n||it.skuId;},
+getMsItemSave(it){const s=it.entity==='eur'?D.ms.eur:D.ms.usd;const sk=s.find(x=>x.id===it.skuId);if(!sk)return'0.00';const p=sk[it.cycle];if(!p)return'0.00';const an=it.cycle==='P1YA'||it.cycle==='P3YA';const d=(p.m-p.o)*it.qty;return(an?d/12:d).toFixed(2)+'/mo';},
+updateMsQty(i,v){this.msItems.splice(i,1,{...this.msItems[i],qty:Math.max(1,parseInt(v)||1)});},
+get msSaveMo(){let m=0;this.msItems.forEach(it=>{const s=it.entity==='eur'?D.ms.eur:D.ms.usd;const sk=s.find(x=>x.id===it.skuId);if(!sk)return;const p=sk[it.cycle];if(!p)return;const an=it.cycle==='P1YA'||it.cycle==='P3YA';const d=(p.m-p.o)*it.qty;m+=an?d/12:d;});return m;},
+
+get filteredAdobe(){const s=this.adobeSearch.toLowerCase();return D.adobe.filter(p=>!s||p.n.toLowerCase().includes(s)||p.c.toLowerCase().includes(s));},
+addAdobe(id){const ex=this.adobeItems.find(i=>i.skuId===id);if(ex){this.adobeItems.splice(this.adobeItems.indexOf(ex),1,{...ex,qty:ex.qty+1});}else{this.adobeItems.push({skuId:id,qty:1});}},
+updateAdobeQty(i,v){this.adobeItems.splice(i,1,{...this.adobeItems[i],qty:Math.max(1,parseInt(v)||1)});},
+get adobeSaveMo(){let m=0;this.adobeItems.forEach(it=>{const p=D.adobe.find(x=>x.id===it.skuId);if(p)m+=(p.rrp-p.our)*it.qty/12;});return m;},
+
+get pwSaveMo(){if(!this.pw.productId)return 0;return 1.50*this.pw.qty;},
+
+// Cloud credits
+get azCriteriaCount(){return Object.values(this.cc.az.criteria).filter(Boolean).length;},
+get gcpResult(){
+  const g=this.cc.gcp;
+  if(g.usedScale==='yes')return{amount:100000,tier:'Additional $100K (Year 2)',desc:'For companies that already used their Scale Tier credits.'};
+  if(g.hasFunding==='yes')return{amount:100000,tier:'Scale Tier ($100K)',desc:'For companies with institutional VC funding. One Google support agent mentioned a $500K minimum — worth trying with smaller rounds.'};
+  if(g.isSaaS==='yes'&&g.hasFunding==='no')return{amount:2000,tier:'Start Tier ($2K)',desc:'For SaaS products without funding, via activate provider. Approval not guaranteed, takes up to a month.'};
+  return null;
+},
+get hasCredits(){return!!(this.gcpResult||this.cfResult||(this.azResult&&this.azResult.amount>0));},
+get azResult(){
+  const count=this.azCriteriaCount;
+  const spend=parseFloat(this.cc.az.monthlySpend)||0;
+  if(count>=4&&spend>10000)return{amount:300000,desc:count+'/7 criteria + spend >$10K/mo → up to $300K in Azure credits.'};
+  if(count>=4)return{amount:25000,desc:count+'/7 criteria met → up to $25K. Add monthly spend >$10K to unlock $300K tier.'};
+  return{amount:0,desc:count+'/7 criteria met. Need 4 or more to qualify.'};
+},
+get cfResult(){
+  const c=this.cc.cf;
+  if(c.software&&c.last5&&c.linkedin&&c.funded)return{amount:25000,tier:'$25K Startup Credit',desc:'All criteria met — software product, founded within 5 years, active LinkedIn presence, and funded.'};
+  if(c.software&&c.last5)return{amount:5000,tier:'$5K Startup Credit',desc:'Building a software product, founded in last 5 years. Add active LinkedIn + funding to unlock $25K.'};
+  return null;
+},
+
+resetAll(){this.region=null;this.regionScope='all';this.gwRegion=null;this.msRegion=null;this.svc={gw:false,ms:false,adobe:false,pw:false,cc:false};this.gwItems=[];this.gwCur='eur';this.gwBilling='commit';this.gwPlanId='';this.gwQty=1;this.msItems=[];this.msCycle='P1YA';this.msEntity='eur';this.msSearch='';this.adobeItems=[];this.adobeSearch='';this.pw={productId:null,qty:1};this.cc={gcp:{isSaaS:null,hasFunding:null,usedScale:null},aws:{monthlySpend:0,appliedBefore:null,hasFunding:null,usesAnthropic:null,usesGPU:null,foundedYear:''},az:{criteria:{under:false,second:false,tech:false,b2b:false,ai:false,mvp:false,backed:false},monthlySpend:0},cf:{software:null,last5:null,linkedin:false,funded:false}};this.totalMo=0;this.totalAn=0;}
+};}
+</script>
+</body>
+</html>
